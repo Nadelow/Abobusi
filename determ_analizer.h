@@ -51,14 +51,9 @@ public:
 	int friend operator<(const Lexem& obj1, const Lexem& obj2);
 };
 
-//объявление указателя на функции. Возвращаемое значение State - состояние, в которое автомат переходит после выполнения процедуры
-typedef State(Determ_analizer::*det_func_ptr)();
-
-
 class Determ_analizer
 {
 protected:
-	std::map<State, std::map<Symbolic_token, det_func_ptr>> m_transition_table; //Таблица переходов анализатора
 	State m_cur_state;                                                          //Текущее состояние
 	Symbolic_token m_cur_sym;                                                   //Текущий символ
 	std::fstream m_input_file;                                                  //Файл
