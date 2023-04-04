@@ -2,56 +2,86 @@
 #include "determ_analizer.h"
 #include <list>
 #include <vector>
-class lex_block_basic : public determ_analizer
+class lex_block_basic : public Determ_analizer
 {
 protected:
-	std::map<std::string, Lexem> m_lexems;                               //��������� ������
-	std::map<std::string, double> m_name_table;                          //������� ���
-	std::list<std::tuple<Lexem, long long int, size_t>> m_lexem_list;    //������ ������. �������� -- ������� �������-��������-�����_������
-	std::vector<std::tuple<char, int, funct_ptr>> m_detect_table;        //������� �����������
+	typedef State(lex_block_basic::* lex_func_ptr)();                    //Указатель 
+	std::map<std::string, Lexem> m_lexems;                               //Коллекция лексем
+	std::map<std::string, double> m_name_table;                          //Таблица имён
+	std::list<std::tuple<Lexem, long long int, size_t>> m_lexem_list;    //Список лексем. Элементы -- кортежи лексема-значение-номер_строки
+	std::vector<std::tuple<char, int, lex_func_ptr>> m_detect_table;        //Таблица обнаружения
 
 	const size_t m_state_number = 23;
 	const size_t m_symbols_number = 10;
 
-	Lexem m_reg_class;               //������� ������ �������
-	long long int m_reg_name_table_pointer;  //������� ��������� �� ������� ���, �������� ��������� PUSH � POP
-	size_t m_reg_relation;           //�������, �������� ������  ������ ���������
-	double m_reg_number;             //������� �����
-	size_t m_reg_order;              //������� �������
-	size_t m_reg_counter;            //������� ��������
-	size_t m_reg_is_negative;        //����
-	size_t m_reg_line_num = 1;       //������� �������� ������ ������
-	std::string m_reg_var_name;      //������� ����� ����������
-	size_t m_reg_detection = 0;      //������� ������� �����������
-	size_t m_reg_value;              //������� ��������
-
+	Lexem m_reg_class;               //Регистр класса лексемы
+	long long int m_reg_name_table_pointer;  //Регистр указателя на таблицу имён, является значением PUSH и POP
+	size_t m_reg_relation;           //Регистр, хранящий первый  символ отношения
+	double m_reg_number;             //Регистр числа
+	size_t m_reg_order;              //Регистр порядка
+	size_t m_reg_counter;            //Регистр счётчика
+	size_t m_reg_sign;               //Регистр знака
+	size_t m_reg_line_num = 1;       //Регистр текущего номера строки
+	std::string m_reg_var_name;      //Регистр имени переменной
+	size_t m_reg_detection = 0;      //Регистр таблицы обнаружения
+	size_t m_reg_value;              //Регистр значения
+	Symbolic_token m_curr_sym;
+	State m_curr_state;
+	std::map<State, std::map<Symbolic_token, lex_func_ptr>> m_transition_table;
 	std::map<char, int> m_begin_vector;
 public:
+	//Конструктор, принимающий имя файла для анализа в качестве аргумента
 	lex_block_basic(std::string filename);
-	virtual void parse() override;
+
 	~lex_block_basic() { m_input_file.close(); }
+
+	void print_lexem_list();
 private:
+	//Функция парсинга, формирующая список лексем на основе входного файла
+	virtual void parse() override;
+
+	//Определяет, к какому классу принадлежит входной символ. В соответствие с этим присваивает id и значение.
 	Symbolic_token transliterator(int sym) override;
 
+	//Функция заполняет коллекцию состояний.
 	void fill_states() override;
 
+	//Функция заполняет коллекцию символьных лексем.
 	void fill_sym_lexems() override;
 
+	//Заполнение таблицы переходов
 	void fill_transition_table() override;
 
+	//Заполнение коллекции лексем
 	void fill_lexems();
 	
+	//Инициализация начального вектора
 	void init_begin_vect();
 
+	//Инициализация таблицы обнаружения
 	void init_detect_table();
 
+	//Добавление константы в таблицу имён
 	void add_constant();
 
+	//Добавление переменной в таблицу имён
 	void add_variable();
 
+	//Создание лексемы
 	void create_lexem();
 
+	std::string relation_table(long long int sym);
+
+	void calc_constant();
+
 	///////////////////////////////////////Procedures////////////////////////////////////////////////
+	void DA1E();
+	void DA1D();
+	void DA2D();
+	void DA3D();
+
+	State ERROR1();
+
 	State A1();
 	State A1a();
 	State A1b();
@@ -66,9 +96,10 @@ private:
 	State A2d();
 	State A2e();
 	State A2f();
+	State A2g();
+	State A2h();
 	State A2j();
 	State A2k();
-	State A2l();
 	State A2m();
 	State A2n();
 	State A2o();
@@ -78,6 +109,7 @@ private:
 	State A2s();
 	State A2t();
 	State A2u();
+	State A2i();
 
 	State A3();
 	State A3a();
@@ -101,12 +133,12 @@ private:
 	State C2();
 	State C2a();
 	State C2b();
-	State C2c();
 	State C2d();
 	
 	State D1();
 	State D1a();
 	State D1b();
+	State D1c();
 	
 	State D2();
 	State D2a();
@@ -135,6 +167,7 @@ private:
 	State E2();
 	State E2a();
 	State E2b();
+	State E2c();
 
 	State F1();
 	State F1a();
