@@ -7,68 +7,68 @@
 
 class State {
 public:
-	std::string m_name;                //РРјСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ 
-	size_t m_id;                       //РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃРѕСЃС‚РѕСЏРЅРёСЏ(РґР»СЏ РєР°Р¶РґРѕРіРѕ РёРјРµРЅРё СѓРЅРёРєР°Р»СЊРЅС‹Р№)
+	std::string m_name;                //Имя состояния 
+	size_t m_id;                       //Идентификатор состояния(для каждого имени уникальный)
 
-	//РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ СЃ РїР°СЂР°РјРµС‚СЂР°РјРё РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ. name_ - РёРјСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ, id_ - РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ
+	//Конструктор с параметрами по умолчанию. name_ - имя состояния, id_ - идентификатор
 	State(const std::string& name_ = "", size_t id_ = 0) : m_name(name_),  m_id(id_){}
 
-	//РћРїРµСЂР°С‚РѕСЂ <. РЎСЂР°РІРЅРёРІР°СЋС‚СЃСЏ С‚РѕР»СЊРєРѕ id
+	//Оператор <. Сравниваются только id
 	int friend operator<(const State& obj1, const State& obj2);
 
-	//РћРїРµСЂР°С‚РѕСЂ РїСЂРёСЃРІР°РёРІР°РЅРёСЏ
+	//Оператор присваивания
 	State& operator=(const State& obj);
 };
 
 class Symbolic_token {
 public:
-	std::string m_s_lex_name;          //РёРјСЏ Р»РµРєСЃРµРјС‹
-	int m_s_lex_value;                 //Р·РЅР°С‡РµРЅРёРµ СЃРёРјРІРѕР»СЊРЅРѕР№ Р»РµРєСЃРµРјС‹
-	size_t m_s_lex_id;                 //id Р»РµРєСЃРµРјС‹
+	std::string m_sym_name;          //имя лексемы
+	int m_sym_value;                 //значение символьной лексемы
+	size_t m_sym_id;                 //id лексемы
 
-	//РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ СЃ РїР°СЂР°РјРµС‚СЂР°РјРё РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ. name_ - РёРјСЏ, value_ - Р·РЅР°С‡РµРЅРёРµ, id_ - РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ
-	Symbolic_token(std::string name_ = "", int value_ = -1, size_t id_ = 0) : m_s_lex_name(name_), m_s_lex_value(value_), m_s_lex_id(id_){};
+	//Конструктор с параметрами по умолчанию. name_ - имя, value_ - значение, id_ - идентификатор
+	Symbolic_token(std::string name_ = "", int value_ = -1, size_t id_ = 0) : m_sym_name(name_), m_sym_value(value_), m_sym_id(id_){};
 
-	//РћРїРµСЂР°С‚РѕСЂ РїСЂРёСЃРІР°РёРІР°РЅРёСЏ
+	//Оператор присваивания
 	Symbolic_token& operator=(const Symbolic_token& obj);
 
-	//РћРїРµСЂР°С‚РѕСЂ <. РЎСЂР°РІРЅРёРІР°СЋС‚СЃСЏ С‚РѕР»СЊРєРѕ id
-	int friend operator<(const Symbolic_token& obj1_, const Symbolic_token& obj2_) { return obj1_.m_s_lex_id < obj2_.m_s_lex_id; }
+	//Оператор <. Сравниваются только id
+	int friend operator<(const Symbolic_token& obj1_, const Symbolic_token& obj2_) { return obj1_.m_sym_id < obj2_.m_sym_id; }
 };
 
 class Lexem {
 public:
-	size_t m_lex_id;                  //id Р»РµРєСЃРµРјС‹
-	std::string m_lex_class;          //РєР»Р°СЃСЃ Р»РµРєСЃРµРјС‹
+	size_t m_lex_id;                  //id лексемы
+	std::string m_lex_class;          //класс лексемы
 
-	//РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ СЃ РїР°СЂР°РјРµС‚СЂР°РјРё РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ. lex_class - РєР»Р°СЃСЃ Р»РµРєСЃРµРјС‹(std::string), id - РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ(СѓРЅРёРєР°Р»СЊРЅС‹Р№ РґР»СЏ РєР°Р¶РґРѕРіРѕ РєР»Р°СЃСЃР°)
+	//Конструктор с параметрами по умолчанию. lex_class - класс лексемы(std::string), id - идентификатор(уникальный для каждого класса)
 	Lexem(std::string lex_class = "", size_t id = 0) : m_lex_class(lex_class), m_lex_id(id) {}
 
-	//РћРїРµСЂР°С‚РѕСЂ РїСЂРёСЃРІР°РёРІР°РЅРёСЏ
+	//Оператор присваивания
 	Lexem& operator=(const Lexem& obj);
 	
-	//РћРїРµСЂР°С‚РѕСЂ <. РЎСЂР°РІРЅРёРІР°СЋС‚СЃСЏ С‚РѕР»СЊРєРѕ id
+	//Оператор <. Сравниваются только id
 	int friend operator<(const Lexem& obj1, const Lexem& obj2);
 };
 
 class Determ_analizer
 {
 protected:
-	State m_cur_state;                                                          //РўРµРєСѓС‰РµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ
-	Symbolic_token m_cur_sym;                                                   //РўРµРєСѓС‰РёР№ СЃРёРјРІРѕР»
-	std::fstream m_input_file;                                                  //Р¤Р°Р№Р»
-	std::map<std::string, Symbolic_token> m_sym_lexems;                         //РљРѕР»Р»РµРєС†РёСЏ СЃРёРјРІРѕР»СЊРЅС‹С… Р»РµРєСЃРµРј
-	std::map<std::string, State> m_states;                                      //РљРѕР»Р»РµРєС†РёСЏ СЃРѕСЃС‚РѕСЏРЅРёР№
+	State m_cur_state;                                                          //Текущее состояние
+	Symbolic_token m_cur_sym;                                                   //Текущий символ
+	std::fstream m_input_file;                                                  //Файл
+	std::map<std::string, Symbolic_token> m_sym_lexems;                         //Коллекция символьных лексем
+	std::map<std::string, State> m_states;                                      //Коллекция состояний
 
-	//Р’РёСЂС‚СѓР°Р»СЊРЅР°СЏ С„СѓРЅРєС†РёСЏ С‚СЂР°РЅСЃР»РёС‚РµСЂР°С†РёРё. РџРѕ РІС…РѕРґРЅРѕРјСѓ СЃРёРјРІРѕР»Сѓ РѕРїСЂРµРґРµР»СЏРµС‚ РєР»Р°СЃСЃ Р»РµРєСЃРµРјС‹ Рё РїСЂРёСЃРІР°РёРІР°РµС‚ РµР№ Р·РЅР°С‡РµРЅРёРµ.
+	//Виртуальная функция транслитерации. По входному символу определяет класс лексемы и присваивает ей значение.
 	virtual Symbolic_token transliterator(int sym) = 0; 
-	//Р’РёСЂС‚СѓР°Р»СЊРЅР°СЏ С„СѓРЅРєС†РёСЏ Р·Р°РїРѕР»РЅРµРЅРёСЏ РєРѕР»Р»РµРєС†РёРё СЃРёРјРІРѕР»СЊРЅС‹С… Р»РµРєСЃРµРј.
+	//Виртуальная функция заполнения коллекции символьных лексем.
 	virtual void fill_sym_lexems() = 0;
-	//Р’РёСЂС‚СѓР°Р»СЊРЅР°СЏ С„СѓРЅРєС†РёСЏ Р·Р°РїРѕР»РЅРµРЅРёСЏ РєРѕР»Р»РµРєС†РёРё СЃРѕСЃС‚РѕСЏРЅРёР№.
+	//Виртуальная функция заполнения коллекции состояний.
 	virtual void fill_states() = 0;
-	//Р’РёСЂС‚СѓР°Р»СЊРЅР°СЏ С„СѓРЅРєС†РёСЏ Р·Р°РїРѕР»РЅРµРЅРёСЏ С‚Р°Р±Р»РёС†С‹ РїРµСЂРµС…РѕРґРѕРІ.
+	//Виртуальная функция заполнения таблицы переходов.
 	virtual void fill_transition_table() = 0;
 public:
-	virtual void parse() = 0;  //Р¤СѓРЅРєС†РёСЏ РїР°СЂСЃРёРЅРіР°
+	virtual void parse() = 0;  //Функция парсинга
 };
 

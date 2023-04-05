@@ -2,9 +2,9 @@
 
 Symbolic_token& Symbolic_token::operator=(const Symbolic_token& obj)
 {
-    m_s_lex_name = obj.m_s_lex_name; 
-    m_s_lex_id = obj.m_s_lex_id; 
-    m_s_lex_value = obj.m_s_lex_value; 
+    m_sym_name = obj.m_sym_name; 
+    m_sym_id = obj.m_sym_id; 
+    m_sym_value = obj.m_sym_value; 
     return *this;
 }
 
