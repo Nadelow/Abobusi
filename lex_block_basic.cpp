@@ -14,10 +14,7 @@ lex_block_basic::lex_block_basic(std::string filename)
 	fill_transition_table();
 	init_begin_vect();
 	init_detect_table();
-}
-
-void lex_block_basic::parse()
-{
+	parse();
 }
 
 Symbolic_token lex_block_basic::transliterator(int sym)
@@ -177,50 +174,18 @@ void lex_block_basic::init_detect_table()
 	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('o', 0, &lex_block_basic::A2u));
 }
 
-void lex_block_basic::add_constant()
-{
-	std::string const_name = std::to_string(m_reg_number);
-	m_name_table.emplace(std::pair<std::string, double>(const_name, m_reg_number));
-	m_reg_name_table_pointer = reinterpret_cast<long long int>(&m_name_table[const_name]);
-}
-
-void lex_block_basic::add_variable()
-{
-	m_name_table.emplace(std::pair<std::string, double>(m_reg_var_name, m_reg_number));
-	m_reg_name_table_pointer = reinterpret_cast<long long int>(&m_name_table[m_reg_var_name]);
-}
-
-void lex_block_basic::create_lexem()
-{
-	if (m_reg_class.m_lex_id == 0 /*line*/ || m_reg_class.m_lex_id == 2 /*aur oper*/)
-	{
-		std::tuple<Lexem, long long int, int> tup(m_reg_class, m_reg_value, m_reg_line_num);
-		m_lexem_list.push_back(tup);
-	}
-	else if (m_reg_class.m_lex_id == 1 /*operand*/ || m_reg_class.m_lex_id == 4 /*next*/ || \
-		m_reg_class.m_lex_id == 5 /*let*/ || m_reg_class.m_lex_id == 6 /*for*/ || m_reg_class.m_lex_id == 7 /*goto*/ || \
-		m_reg_class.m_lex_id == 8 /*gosub*/)
-	{
-		std::tuple<Lexem, long long int, int> tup(m_reg_class, m_reg_name_table_pointer, m_reg_line_num);
-		m_lexem_list.push_back(tup);
-	}
-	else if (m_reg_class.m_lex_id == 3 /*relation*/)
-	{
-		std::tuple<Lexem, long long int, int> tup(m_reg_class, m_reg_relation, m_reg_line_num);
-		m_lexem_list.push_back(tup);
-	}
-	else if (m_reg_class.m_lex_id == 9 /*open_br*/ || m_reg_class.m_lex_id == 10 /*close_br*/ || \
-		m_reg_class.m_lex_id == 11 /*if*/ || m_reg_class.m_lex_id == 12 /*return*/ || m_reg_class.m_lex_id == 13 /*end*/ || \
-		m_reg_class.m_lex_id == 14 /*to*/ || m_reg_class.m_lex_id == 15 /*step*/ || m_reg_class.m_lex_id == 16 /*rem*/ || \
-		m_reg_class.m_lex_id == 17 /*error*/ || m_reg_class.m_lex_id == 18 /*eof*/)
-	{
-		std::tuple<Lexem, long long int, int> tup(m_reg_class, -1, m_reg_line_num);
-		m_lexem_list.push_back(tup);
-	}
-}
-
 void lex_block_basic::fill_transition_table()
 {
+	for (auto it = m_states.begin(); it != m_states.end(); it++)
+	{
+		for (auto it_sym = m_sym_lexems.begin(); it_sym != m_sym_lexems.end(); it_sym++)
+		{
+
+			(m_transition_table[it->second])[it_sym->second] = &lex_block_basic::ERROR1;
+
+		}
+	}
+
 	(m_transition_table[m_states["A1"]])[m_sym_lexems["sym_digit"]] = &lex_block_basic::E2a;
 	(m_transition_table[m_states["A1"]])[m_sym_lexems["sym_space"]] = &lex_block_basic::A1;
 	(m_transition_table[m_states["A1"]])[m_sym_lexems["sym_lf"]] = &lex_block_basic::A1;
@@ -230,8 +195,8 @@ void lex_block_basic::fill_transition_table()
 	(m_transition_table[m_states["A2"]])[m_sym_lexems["sym_digit"]] = &lex_block_basic::D1a;
 	(m_transition_table[m_states["A2"]])[m_sym_lexems["sym_aur_op"]] = &lex_block_basic::A2a;
 	(m_transition_table[m_states["A2"]])[m_sym_lexems["sym_relat"]] = &lex_block_basic::H1a;
-	(m_transition_table[m_states["A2"]])[m_sym_lexems["s_l_op_brace"]] = &lex_block_basic::A2h;
-	(m_transition_table[m_states["A2"]])[m_sym_lexems["s_l_cls_brace"]] = &lex_block_basic::A3b;
+	(m_transition_table[m_states["A2"]])[m_sym_lexems["sym_lbrace"]] = &lex_block_basic::A2h;
+	(m_transition_table[m_states["A2"]])[m_sym_lexems["sym_rbrace"]] = &lex_block_basic::A3b;
 	(m_transition_table[m_states["A2"]])[m_sym_lexems["sym_dot"]] = &lex_block_basic::D6;
 	(m_transition_table[m_states["A2"]])[m_sym_lexems["sym_space"]] = &lex_block_basic::A2;
 	(m_transition_table[m_states["A2"]])[m_sym_lexems["sym_lf"]] = &lex_block_basic::A1;
@@ -241,8 +206,8 @@ void lex_block_basic::fill_transition_table()
 	(m_transition_table[m_states["A3"]])[m_sym_lexems["sym_digit"]] = &lex_block_basic::D1a;
 	(m_transition_table[m_states["A3"]])[m_sym_lexems["sym_aur_op"]] = &lex_block_basic::A2a;
 	(m_transition_table[m_states["A3"]])[m_sym_lexems["sym_relat"]] = &lex_block_basic::H1a;
-	(m_transition_table[m_states["A3"]])[m_sym_lexems["s_l_op_brace"]] = &lex_block_basic::A2h;
-	(m_transition_table[m_states["A3"]])[m_sym_lexems["s_l_cls_brace"]] = &lex_block_basic::A3b;
+	(m_transition_table[m_states["A3"]])[m_sym_lexems["sym_lbrace"]] = &lex_block_basic::A2h;
+	(m_transition_table[m_states["A3"]])[m_sym_lexems["sym_rbrace"]] = &lex_block_basic::A3b;
 	(m_transition_table[m_states["A3"]])[m_sym_lexems["sym_dot"]] = &lex_block_basic::D6;
 	(m_transition_table[m_states["A3"]])[m_sym_lexems["sym_space"]] = &lex_block_basic::A3;
 	(m_transition_table[m_states["A3"]])[m_sym_lexems["sym_lf"]] = &lex_block_basic::A1;
@@ -258,8 +223,8 @@ void lex_block_basic::fill_transition_table()
 	(m_transition_table[m_states["C2"]])[m_sym_lexems["sym_digit"]] = &lex_block_basic::A3a;
 	(m_transition_table[m_states["C2"]])[m_sym_lexems["sym_aur_op"]] = &lex_block_basic::A2g;
 	(m_transition_table[m_states["C2"]])[m_sym_lexems["sym_relat"]] = &lex_block_basic::H1b;
-	(m_transition_table[m_states["C2"]])[m_sym_lexems["s_l_op_brace"]] = &lex_block_basic::A2k;
-	(m_transition_table[m_states["C2"]])[m_sym_lexems["s_l_cls_brace"]] = &lex_block_basic::A3c;
+	(m_transition_table[m_states["C2"]])[m_sym_lexems["sym_lbrace"]] = &lex_block_basic::A2k;
+	(m_transition_table[m_states["C2"]])[m_sym_lexems["sym_rbrace"]] = &lex_block_basic::A3c;
 	(m_transition_table[m_states["C2"]])[m_sym_lexems["sym_space"]] = &lex_block_basic::C2;
 	(m_transition_table[m_states["C2"]])[m_sym_lexems["sym_lf"]] = &lex_block_basic::A1a;
 	(m_transition_table[m_states["C2"]])[m_sym_lexems["sym_eof"]] = &lex_block_basic::EXIT2;
@@ -268,8 +233,8 @@ void lex_block_basic::fill_transition_table()
 	(m_transition_table[m_states["D1"]])[m_sym_lexems["sym_digit"]] = &lex_block_basic::D1b;
 	(m_transition_table[m_states["D1"]])[m_sym_lexems["sym_aur_op"]] = &lex_block_basic::A2c;
 	(m_transition_table[m_states["D1"]])[m_sym_lexems["sym_relat"]] = &lex_block_basic::H1c;
-	(m_transition_table[m_states["D1"]])[m_sym_lexems["s_l_op_brace"]] = &lex_block_basic::A2l;
-	(m_transition_table[m_states["D1"]])[m_sym_lexems["s_l_cls_brace"]] = &lex_block_basic::A3d;
+	(m_transition_table[m_states["D1"]])[m_sym_lexems["sym_lbrace"]] = &lex_block_basic::A2l;
+	(m_transition_table[m_states["D1"]])[m_sym_lexems["sym_rbrace"]] = &lex_block_basic::A3d;
 	(m_transition_table[m_states["D1"]])[m_sym_lexems["sym_dot"]] = &lex_block_basic::D2c;
 	(m_transition_table[m_states["D1"]])[m_sym_lexems["sym_space"]] = &lex_block_basic::D1;
 	(m_transition_table[m_states["D1"]])[m_sym_lexems["sym_lf"]] = &lex_block_basic::A1b;
@@ -279,8 +244,8 @@ void lex_block_basic::fill_transition_table()
 	(m_transition_table[m_states["D2"]])[m_sym_lexems["sym_digit"]] = &lex_block_basic::D2a;
 	(m_transition_table[m_states["D2"]])[m_sym_lexems["sym_aur_op"]] = &lex_block_basic::A2d;
 	(m_transition_table[m_states["D2"]])[m_sym_lexems["sym_relat"]] = &lex_block_basic::H1d;
-	(m_transition_table[m_states["D2"]])[m_sym_lexems["s_l_op_brace"]] = &lex_block_basic::A2m;
-	(m_transition_table[m_states["D2"]])[m_sym_lexems["s_l_cls_brace"]] = &lex_block_basic::A3e;
+	(m_transition_table[m_states["D2"]])[m_sym_lexems["sym_lbrace"]] = &lex_block_basic::A2m;
+	(m_transition_table[m_states["D2"]])[m_sym_lexems["sym_rbrace"]] = &lex_block_basic::A3e;
 	(m_transition_table[m_states["D2"]])[m_sym_lexems["sym_space"]] = &lex_block_basic::D2;
 	(m_transition_table[m_states["D2"]])[m_sym_lexems["sym_lf"]] = &lex_block_basic::A1c;
 	(m_transition_table[m_states["D2"]])[m_sym_lexems["sym_eof"]] = &lex_block_basic::EXIT4;
@@ -296,8 +261,8 @@ void lex_block_basic::fill_transition_table()
 	(m_transition_table[m_states["D5"]])[m_sym_lexems["sym_digit"]] = &lex_block_basic::D5c;
 	(m_transition_table[m_states["D5"]])[m_sym_lexems["sym_aur_op"]] = &lex_block_basic::A2e;
 	(m_transition_table[m_states["D5"]])[m_sym_lexems["sym_relat"]] = &lex_block_basic::H1e;
-	(m_transition_table[m_states["D5"]])[m_sym_lexems["s_l_op_brace"]] = &lex_block_basic::A2n;
-	(m_transition_table[m_states["D5"]])[m_sym_lexems["s_l_cls_brace"]] = &lex_block_basic::A3f;
+	(m_transition_table[m_states["D5"]])[m_sym_lexems["sym_lbrace"]] = &lex_block_basic::A2n;
+	(m_transition_table[m_states["D5"]])[m_sym_lexems["sym_rbrace"]] = &lex_block_basic::A3f;
 	(m_transition_table[m_states["D5"]])[m_sym_lexems["sym_space"]] = &lex_block_basic::D5;
 	(m_transition_table[m_states["D5"]])[m_sym_lexems["sym_lf"]] = &lex_block_basic::A1d;
 	(m_transition_table[m_states["D5"]])[m_sym_lexems["sym_eof"]] = &lex_block_basic::EXIT5;
@@ -312,8 +277,8 @@ void lex_block_basic::fill_transition_table()
 	(m_transition_table[m_states["E2"]])[m_sym_lexems["sym_digit"]] = &lex_block_basic::E2c;
 	(m_transition_table[m_states["E2"]])[m_sym_lexems["sym_aur_op"]] = &lex_block_basic::A2f;
 	(m_transition_table[m_states["E2"]])[m_sym_lexems["sym_relat"]] = &lex_block_basic::H1f;
-	(m_transition_table[m_states["E2"]])[m_sym_lexems["s_l_op_brace"]] = &lex_block_basic::A2j;
-	(m_transition_table[m_states["E2"]])[m_sym_lexems["s_l_cls_brace"]] = &lex_block_basic::A3g;
+	(m_transition_table[m_states["E2"]])[m_sym_lexems["sym_lbrace"]] = &lex_block_basic::A2j;
+	(m_transition_table[m_states["E2"]])[m_sym_lexems["sym_rbrace"]] = &lex_block_basic::A3g;
 	(m_transition_table[m_states["E2"]])[m_sym_lexems["sym_space"]] = &lex_block_basic::E2;
 	(m_transition_table[m_states["E2"]])[m_sym_lexems["sym_lf"]] = &lex_block_basic::A1e;
 	(m_transition_table[m_states["E2"]])[m_sym_lexems["sym_eof"]] = &lex_block_basic::EXIT6;
@@ -332,8 +297,8 @@ void lex_block_basic::fill_transition_table()
 	(m_transition_table[m_states["G1"]])[m_sym_lexems["sym_digit"]] = &lex_block_basic::G1;
 	(m_transition_table[m_states["G1"]])[m_sym_lexems["sym_aur_op"]] = &lex_block_basic::G1;
 	(m_transition_table[m_states["G1"]])[m_sym_lexems["sym_relat"]] = &lex_block_basic::G1;
-	(m_transition_table[m_states["G1"]])[m_sym_lexems["s_l_op_brace"]] = &lex_block_basic::G1;
-	(m_transition_table[m_states["G1"]])[m_sym_lexems["s_l_cls_brace"]] = &lex_block_basic::G1;
+	(m_transition_table[m_states["G1"]])[m_sym_lexems["sym_lbrace"]] = &lex_block_basic::G1;
+	(m_transition_table[m_states["G1"]])[m_sym_lexems["sym_rbrace"]] = &lex_block_basic::G1;
 	(m_transition_table[m_states["G1"]])[m_sym_lexems["sym_space"]] = &lex_block_basic::G1;
 	(m_transition_table[m_states["G1"]])[m_sym_lexems["sym_dot"]] = &lex_block_basic::G1;
 	(m_transition_table[m_states["G1"]])[m_sym_lexems["sym_lf"]] = &lex_block_basic::A1;
@@ -343,8 +308,8 @@ void lex_block_basic::fill_transition_table()
 	(m_transition_table[m_states["H1"]])[m_sym_lexems["sym_digit"]] = &lex_block_basic::D1c;
 	(m_transition_table[m_states["H1"]])[m_sym_lexems["sym_aur_op"]] = &lex_block_basic::A2g;
 	(m_transition_table[m_states["H1"]])[m_sym_lexems["sym_relat"]] = &lex_block_basic::A2p;
-	(m_transition_table[m_states["H1"]])[m_sym_lexems["s_l_op_brace"]] = &lex_block_basic::A2k;
-	(m_transition_table[m_states["H1"]])[m_sym_lexems["s_l_cls_brace"]] = &lex_block_basic::A3c;
+	(m_transition_table[m_states["H1"]])[m_sym_lexems["sym_lbrace"]] = &lex_block_basic::A2k;
+	(m_transition_table[m_states["H1"]])[m_sym_lexems["sym_rbrace"]] = &lex_block_basic::A3c;
 	(m_transition_table[m_states["H1"]])[m_sym_lexems["sym_dot"]] = &lex_block_basic::D6a;
 	(m_transition_table[m_states["H1"]])[m_sym_lexems["sym_space"]] = &lex_block_basic::H1;
 	(m_transition_table[m_states["H1"]])[m_sym_lexems["sym_lf"]] = &lex_block_basic::A1a;
@@ -417,13 +382,13 @@ void lex_block_basic::DA1E()
 
 void lex_block_basic::DA1D()
 {
-	m_reg_order -= m_reg_counter;
+	m_reg_order -= (long)m_reg_counter;
 	calc_constant();
 }
 
 void lex_block_basic::DA2D()
 {
-	m_reg_order -= m_reg_counter;
+	m_reg_order -= (long)m_reg_counter;
 	m_reg_class = m_lexems["l_operand"];
 	calc_constant();
 }
@@ -434,7 +399,7 @@ void lex_block_basic::DA3D()
 	{
 		m_reg_order *= -1;
 	}
-	m_reg_order -= m_reg_counter;
+	m_reg_order -= (long)m_reg_counter;
 	calc_constant();
 }
 
@@ -443,7 +408,7 @@ State lex_block_basic::A1a()
 	if (m_reg_var_name != "")
 		add_variable();
 	create_lexem();
-	if (m_curr_sym.m_s_lex_id == 3 && m_curr_sym.m_sym_value == '=')
+	if (m_curr_sym.m_sym_id == 3 && m_curr_sym.m_sym_value == '=')
 		m_reg_relation = 1;
 	else if (m_curr_sym.m_sym_value == '<')
 		m_reg_relation = 3;
@@ -1051,29 +1016,207 @@ State lex_block_basic::ERROR1()
 
 	m_reg_class = m_lexems["l_error"];
 	create_lexem();
-/*	if (m_curr_sym.m_s_lex_id == 9) // eof
+	if (m_curr_sym.m_sym_id == 6) // eof
 	{
 		return EXIT1();
 	}
 
-	if (m_curr_sym.m_s_lex_id == 8)
+	if (m_curr_sym.m_sym_id == 5)
 	{
 		return m_states["A1"];
 	}
 
-	return m_curr_state;*/
-	while (m_curr_sym.m_s_lex_id != 9 || m_curr_sym.m_s_lex_id != 8)
+	return m_curr_state;
+	//while (m_curr_sym.m_sym_id != 6 && m_curr_sym.m_sym_id != 5)
+	//{
+	//	m_curr_sym = transliterator(m_input_file.get());
+	//}
+	//if (m_curr_sym.m_sym_id == 6) // eof
+	//{
+	//	return EXIT1();
+	//}
+	//if (m_curr_sym.m_sym_id == 5)
+	//{
+	//	return m_states["A1"];
+	//}
+}
+
+void lex_block_basic::print_lexem_list()
+{
+	for (auto it = m_lexem_list.begin(); it != m_lexem_list.end(); ++it)
+	{
+		switch (std::get<0>(*it).m_lex_id)
+		{
+		case 0: //line
+		{
+			std::cout << std::endl << std::get<2>(*it) << " ";
+			break;
+		}
+		case 1: //operand
+		{
+			std::cout << (reinterpret_cast<variable*>(std::get<1>(*it))->var_name) << " ";
+			break;
+		}
+		case 2: // ar op
+		{
+			std::cout << ((char)std::get<1>(*it)) << " ";
+			break;
+		}
+		case 3: // relation
+		{
+			std::cout << (relation_table(std::get<1>(*it))) << " ";
+			break;
+		}
+		case 4: //next
+		{
+			std::cout << "NEXT " << (reinterpret_cast<variable*>(std::get<1>(*it))->var_name) << " ";
+			break;
+		}
+		case 5: //let
+		{
+			std::cout << "LET " << (reinterpret_cast<variable*>(std::get<1>(*it))->var_name) << " =" << " ";
+			break;
+		}
+		case 6: //for
+		{
+			std::cout << "FOR " << (reinterpret_cast<variable*>(std::get<1>(*it))->var_name) << " =" << " ";
+			break;
+		}
+		case 7: //goto
+		{
+			std::cout << "GOTO " << (std::get<1>(*it)) << " ";
+			break;
+		}
+		case 8: //gosub
+		{
+			std::cout << "GOSUB " << (std::get<1>(*it)) << " ";
+			break;
+		}
+		case 9:// (
+		{
+			std::cout << "(" << " ";
+			break;
+		}
+		case 10:// )
+		{
+			std::cout << ")" << " ";
+			break;
+		}
+		case 11:// if
+		{
+			std::cout << "IF" << " ";
+			break;
+		}
+		case 12:// return
+		{
+			std::cout << "RETURN" << " ";
+			break;
+		}
+		case 13:// end
+		{
+			std::cout << "END" << " ";
+			break;
+		}
+		case 14:// to
+		{
+			std::cout << "TO" << " ";
+			break;
+		}
+		case 15:// step
+		{
+			std::cout << "STEP" << " ";
+			break;
+		}
+		case 16:// rem
+		{
+			std::cout << "REM" << " ";
+			break;
+		}
+		case 17:// err
+		{
+			std::cout << "!ERROR!" << " ";
+			break;
+		}
+		case 18:// return
+		{
+			std::cout << std::endl << "EOF" << " ";
+			break;
+		}
+
+
+		};
+	}
+	std::cout << std::endl;
+
+}
+
+void lex_block_basic::calc_constant()
+{
+	m_reg_number = m_reg_number * std::powl(10.0, m_reg_order);
+	add_constant();
+	m_reg_number = 0;
+	m_reg_counter = 0;
+	m_reg_order = 0;
+}
+
+void lex_block_basic::add_constant()
+{
+	std::ostringstream str_stream;
+	str_stream << m_reg_number;
+	std::string const_id = str_stream.str();
+	variable var;
+	var.var_name = const_id;
+	var.var_value = m_reg_number;
+	m_name_table.emplace(std::pair<std::string, variable>(const_id, var));
+	m_reg_name_table_pointer = reinterpret_cast<long long int>(&m_name_table[const_id]);
+
+}
+
+void lex_block_basic::add_variable()
+{
+	variable var;
+	var.var_name = m_reg_var_name;
+	var.var_value = 0;
+	m_name_table.emplace(std::pair<std::string, variable>(m_reg_var_name, var));
+	m_reg_name_table_pointer = reinterpret_cast<long long int>(&m_name_table[m_reg_var_name]);
+	m_reg_var_name = "";
+}
+
+void lex_block_basic::parse()
+{
+	while (m_curr_state.m_id != 19)
 	{
 		m_curr_sym = transliterator(m_input_file.get());
-	}
-	if (m_curr_sym.m_s_lex_id == 6) // eof
-	{
-		return EXIT1();
-	}
-	if (m_curr_sym.m_s_lex_id == 5)
-	{
-		return m_states["A1"];
+
+		m_curr_state = (this->*m_transition_table[m_curr_state][m_curr_sym.m_sym_name])();
 	}
 }
 
+void lex_block_basic::create_lexem()
+{
+	if (m_reg_class.m_lex_id == 0 /*line*/ || m_reg_class.m_lex_id == 2 /*aur oper*/ || m_reg_class.m_lex_id == 7 /*goto*/ || m_reg_class.m_lex_id == 8 /*gosub*/)
+	{
+		std::tuple<Lexem, long long int, int> tup(m_reg_class, m_reg_value, m_reg_line_num);
+		m_lexem_list.push_back(tup);
+	}
+	else if (m_reg_class.m_lex_id == 1 /*operand*/ || m_reg_class.m_lex_id == 4 /*next*/ || m_reg_class.m_lex_id == 5 /*let*/ || \
+		m_reg_class.m_lex_id == 6 /*for*/)
+	{
+		std::tuple<Lexem, long long int, int> tup(m_reg_class, m_reg_name_table_pointer, m_reg_line_num);
+		m_lexem_list.push_back(tup);
+	}
+	else if (m_reg_class.m_lex_id == 3 /*relation*/)
+	{
+		std::tuple<Lexem, long long int, int> tup(m_reg_class, m_reg_relation, m_reg_line_num);
+		m_lexem_list.push_back(tup);
+	}
+	else if (m_reg_class.m_lex_id == 9 /*open_br*/ || m_reg_class.m_lex_id == 10 /*close_br*/ || \
+		m_reg_class.m_lex_id == 11 /*if*/ || m_reg_class.m_lex_id == 12 /*return*/ || m_reg_class.m_lex_id == 13 /*end*/ || \
+		m_reg_class.m_lex_id == 14 /*to*/ || m_reg_class.m_lex_id == 15 /*step*/ || m_reg_class.m_lex_id == 16 /*rem*/ || \
+		m_reg_class.m_lex_id == 17 /*error*/ || m_reg_class.m_lex_id == 18 /*eof*/)
+	{
+		std::tuple<Lexem, long long int, int> tup(m_reg_class, -1, m_reg_line_num);
+		m_lexem_list.push_back(tup);
+	}
 
+}

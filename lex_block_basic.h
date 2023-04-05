@@ -2,12 +2,20 @@
 #include "determ_analizer.h"
 #include <list>
 #include <vector>
+#include <sstream>
+
+
 class lex_block_basic : public Determ_analizer
 {
 protected:
+	struct variable 
+	{
+		std::string var_name;
+		double var_value = 0;
+	};
 	typedef State(lex_block_basic::* lex_func_ptr)();                    //Указатель 
 	std::map<std::string, Lexem> m_lexems;                               //Коллекция лексем
-	std::map<std::string, double> m_name_table;                          //Таблица имён
+	std::map<std::string, variable> m_name_table;                          //Таблица имён
 	std::list<std::tuple<Lexem, long long int, size_t>> m_lexem_list;    //Список лексем. Элементы -- кортежи лексема-значение-номер_строки
 	std::vector<std::tuple<char, int, lex_func_ptr>> m_detect_table;        //Таблица обнаружения
 
