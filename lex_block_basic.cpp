@@ -10,10 +10,12 @@ lex_block_basic::lex_block_basic(std::string filename)
 	}
 
 	fill_states();
+	fill_lexems();
 	fill_sym_lexems();
-	fill_transition_table();
 	init_begin_vect();
 	init_detect_table();
+	fill_transition_table();
+	
 	parse();
 }
 
@@ -23,13 +25,13 @@ Symbolic_token lex_block_basic::transliterator(int sym)
 	s_token.m_sym_value = 0;
 	if (isdigit(sym))
 	{
-		s_token = Symbolic_token("sym_digit", sym - '0', 0);
+		s_token = Symbolic_token("sym_digit", sym - '0', 1);
 	}
-	else if ((sym > 64 && sym < 91) || (sym > 96 && sym < 123))
+	else if (sym >= 'A' && sym <= 'Z') 
 	{
-		s_token = Symbolic_token("sym_letter", sym, 1);
+		s_token = Symbolic_token("sym_letter", sym, 0);
 	}
-	else if (sym == '+' || sym == '-' || sym == '*' || sym == '/' || sym == '%')
+	else if (sym == '+' || sym == '-' || sym == '*' || sym == '/' || sym == '^')
 	{
 		s_token = Symbolic_token("sym_aur_op", sym, 2);
 	}
@@ -39,27 +41,27 @@ Symbolic_token lex_block_basic::transliterator(int sym)
 	}
 	else if (sym == ' ' || sym == '\t')
 	{
-		s_token = Symbolic_token("sym_space", -1, 4);
+		s_token = Symbolic_token("sym_space", -1, 7);
 	}
 	else if (sym == '\n')
 	{
-		s_token = Symbolic_token("sym_lf", -1, 5);
+		s_token = Symbolic_token("sym_lf", -1, 8);
 	}
 	else if (sym == EOF)
 	{
-		s_token = Symbolic_token("sym_eof", -1, 6);
+		s_token = Symbolic_token("sym_eof", -1, 9);
 	}
 	else if (sym == '(')
 	{
-		s_token = Symbolic_token("sym_lbrace", sym, 7);
+		s_token = Symbolic_token("sym_lbrace", sym, 4);
 	}
 	else if (sym == ')')
 	{
-		s_token = Symbolic_token("sym_rbrace", sym, 8);
+		s_token = Symbolic_token("sym_rbrace", sym, 5);
 	}
 	else if (sym == '.')
 	{
-		s_token = Symbolic_token("sym_dot", sym, 9);
+		s_token = Symbolic_token("sym_dot", sym, 6);
 	}
 	else
 	{
@@ -70,41 +72,41 @@ Symbolic_token lex_block_basic::transliterator(int sym)
 
 void lex_block_basic::fill_states()
 {
-	m_states["A1"] = State("A1", 1);
-	m_states["A2"] = State("A2", 2);
-	m_states["A3"] = State("A3", 3);
-	m_states["B1"] = State("B1", 4);
-	m_states["C1"] = State("C1", 5);
-	m_states["C2"] = State("C2", 6);
-	m_states["D1"] = State("D1", 7);
-	m_states["D2"] = State("D2", 8);
-	m_states["D3"] = State("D3", 9);
-	m_states["D4"] = State("D4", 10);
-	m_states["D5"] = State("D5", 11);
-	m_states["D6"] = State("D6", 12);
-	m_states["E1"] = State("E1", 13);
-	m_states["E2"] = State("E2", 14);
-	m_states["F1"] = State("F1", 15);
-	m_states["F2"] = State("F2", 16);
-	m_states["F3"] = State("F3", 17);
-	m_states["G1"] = State("G1", 18);
-	m_states["H1"] = State("H1", 19);
-	m_states["STOP"] = State("STOP", 0);
+	m_states["A1"] = State("A1", 0);
+	m_states["A2"] = State("A2", 1);
+	m_states["A3"] = State("A3", 2);
+	m_states["B1"] = State("B1", 3);
+	m_states["C1"] = State("C1", 4);
+	m_states["C2"] = State("C2", 5);
+	m_states["D1"] = State("D1", 6);
+	m_states["D2"] = State("D2", 7);
+	m_states["D3"] = State("D3", 8);
+	m_states["D4"] = State("D4", 9);
+	m_states["D5"] = State("D5", 10);
+	m_states["D6"] = State("D6", 11);
+	m_states["E1"] = State("E1", 12);
+	m_states["E2"] = State("E2", 13);
+	m_states["F1"] = State("F1", 14);
+	m_states["F2"] = State("F2", 15);
+	m_states["F3"] = State("F3", 16);
+	m_states["G1"] = State("G1", 17);
+	m_states["H1"] = State("H1", 18);
+	m_states["STOP"] = State("STOP", 19);
 }
 
 void lex_block_basic::fill_sym_lexems()
 {
-	m_sym_lexems["sym_digit"] = Symbolic_token("sym_digit", 0);
-	m_sym_lexems["sym_letter"] = Symbolic_token("sym_letter", 1);
-	m_sym_lexems["sym_aur_op"] = Symbolic_token("sym_aur_op",2);
-	m_sym_lexems["sym_relat"] = Symbolic_token("sym_relat",3);
-	m_sym_lexems["sym_space"] = Symbolic_token("sym_space",4);
-	m_sym_lexems["sym_lf"] = Symbolic_token("sym_lf",5);
-	m_sym_lexems["sym_eof"] = Symbolic_token("sym_eof",6);
-	m_sym_lexems["sym_lbrace"] = Symbolic_token("sym_lbrace",7);
-	m_sym_lexems["sym_rbrace"] = Symbolic_token("sym_rbrace",8);
-	m_sym_lexems["sym_dot"] = Symbolic_token("sym_dot",9);
-	m_sym_lexems["sym_error"] = Symbolic_token("sym_error",10);
+	m_sym_lexems["sym_letter"] = Symbolic_token("sym_letter", 0, 0);
+	m_sym_lexems["sym_digit"] = Symbolic_token("sym_digit", 0, 1);
+	m_sym_lexems["sym_aur_op"] = Symbolic_token("sym_aur_op", 0, 2);
+	m_sym_lexems["sym_relat"] = Symbolic_token("sym_relat", 0, 3);
+	m_sym_lexems["sym_lbrace"] = Symbolic_token("sym_lbrace", 0, 4);
+	m_sym_lexems["sym_rbrace"] = Symbolic_token("sym_rbrace", 0, 5);
+	m_sym_lexems["sym_dot"] = Symbolic_token("sym_dot", 0, 6);
+	m_sym_lexems["sym_space"] = Symbolic_token("sym_space", 0, 7);
+	m_sym_lexems["sym_lf"] = Symbolic_token("sym_lf", 0, 8);
+	m_sym_lexems["sym_eof"] = Symbolic_token("sym_eof", 0, 9);
+	m_sym_lexems["sym_error"] = Symbolic_token("sym_error", 0, 10);
 }
 
 void lex_block_basic::fill_lexems()
@@ -132,46 +134,46 @@ void lex_block_basic::fill_lexems()
 
 void lex_block_basic::init_begin_vect()
 {
-	m_begin_vector['e'] = 1;
-	m_begin_vector['f'] = 3;
-	m_begin_vector['g'] = 5;
-	m_begin_vector['i'] = 11;
-	m_begin_vector['l'] = 12;
-	m_begin_vector['n'] = 14;
-	m_begin_vector['r'] = 17;
-	m_begin_vector['s'] = 23;
-	m_begin_vector['t'] = 26;
+	m_begin_vector['E'] = 1;
+	m_begin_vector['F'] = 3;
+	m_begin_vector['G'] = 5;
+	m_begin_vector['I'] = 11;
+	m_begin_vector['L'] = 12;
+	m_begin_vector['N'] = 14;
+	m_begin_vector['R'] = 17;
+	m_begin_vector['S'] = 23;
+	m_begin_vector['T'] = 26;
 }
 
 void lex_block_basic::init_detect_table()
 { 
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('c', 0, &lex_block_basic::B1d));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('n', 0, &lex_block_basic::B1d));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('d', 0, &lex_block_basic::A2q));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('o', 0, &lex_block_basic::B1d));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('r', 0, &lex_block_basic::F1b));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('o', 0, &lex_block_basic::B1d));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('t', 7, &lex_block_basic::B1d));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('o', 0, &lex_block_basic::E1a));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('s', 0, &lex_block_basic::B1d));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('u', 0, &lex_block_basic::B1d));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('b', 0, &lex_block_basic::E1b));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('f', 0, &lex_block_basic::A2r));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('e', 0, &lex_block_basic::B1d));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('t', 0, &lex_block_basic::F1a));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('e', 0, &lex_block_basic::B1d));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('x', 0, &lex_block_basic::B1d));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('t', 0, &lex_block_basic::C1a));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('e', 0, &lex_block_basic::B1d));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('t', 21, &lex_block_basic::B1d));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('u', 0, &lex_block_basic::B1d));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('r', 0, &lex_block_basic::B1d));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('n', 0, &lex_block_basic::A2s));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('m', 0, &lex_block_basic::G1a));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('t', 0, &lex_block_basic::B1d));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('e', 0, &lex_block_basic::B1d));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('p', 0, &lex_block_basic::A2t));
-	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('o', 0, &lex_block_basic::A2u));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('+', 0, &lex_block_basic::B1d));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('N', 0, &lex_block_basic::B1d));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('D', 0, &lex_block_basic::A2q));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('O', 0, &lex_block_basic::B1d));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('R', 0, &lex_block_basic::F1b));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('O', 0, &lex_block_basic::B1d));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('T', 8, &lex_block_basic::B1d));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('O', 0, &lex_block_basic::E1a));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('S', 0, &lex_block_basic::B1d));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('U', 0, &lex_block_basic::B1d));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('B', 0, &lex_block_basic::E1b));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('F', 0, &lex_block_basic::A2r));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('E', 0, &lex_block_basic::B1d));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('T', 0, &lex_block_basic::F1a));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('E', 0, &lex_block_basic::B1d));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('X', 0, &lex_block_basic::B1d));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('T', 0, &lex_block_basic::C1a));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('E', 0, &lex_block_basic::B1d));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('T', 22, &lex_block_basic::B1d));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('U', 0, &lex_block_basic::B1d));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('R', 0, &lex_block_basic::B1d));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('N', 0, &lex_block_basic::A2s));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('M', 0, &lex_block_basic::G1a));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('T', 0, &lex_block_basic::B1d));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('E', 0, &lex_block_basic::B1d));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('P', 0, &lex_block_basic::A2t));
+	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('O', 0, &lex_block_basic::A2u));
 }
 
 void lex_block_basic::fill_transition_table()
@@ -300,6 +302,7 @@ void lex_block_basic::fill_transition_table()
 	(m_transition_table[m_states["G1"]])[m_sym_lexems["sym_lbrace"]] = &lex_block_basic::G1;
 	(m_transition_table[m_states["G1"]])[m_sym_lexems["sym_rbrace"]] = &lex_block_basic::G1;
 	(m_transition_table[m_states["G1"]])[m_sym_lexems["sym_space"]] = &lex_block_basic::G1;
+	(m_transition_table[m_states["G1"]])[m_sym_lexems["sym_error"]] = &lex_block_basic::G1;
 	(m_transition_table[m_states["G1"]])[m_sym_lexems["sym_dot"]] = &lex_block_basic::G1;
 	(m_transition_table[m_states["G1"]])[m_sym_lexems["sym_lf"]] = &lex_block_basic::A1;
 	(m_transition_table[m_states["G1"]])[m_sym_lexems["sym_eof"]] = &lex_block_basic::EXIT1;
@@ -577,7 +580,7 @@ State lex_block_basic::A2p()
 			return ERROR1();
 		}
 	}
-	else// здесь после одного знака встретили не = а что угодно - это ошибка
+	else// Р·РґРµСЃСЊ РїРѕСЃР»Рµ РѕРґРЅРѕРіРѕ Р·РЅР°РєР° РІСЃС‚СЂРµС‚РёР»Рё РЅРµ = Р° С‡С‚Рѕ СѓРіРѕРґРЅРѕ - СЌС‚Рѕ РѕС€РёР±РєР°
 	{
 		return ERROR1();
 	}
@@ -761,7 +764,7 @@ State lex_block_basic::M3()
 {
 	if (m_curr_sym.m_sym_value != 'E')
 	{
-		DA2D();                         //DA2D????
+		DA2D();                         
 		return B1b();
 	}
 	else
@@ -1016,26 +1019,26 @@ State lex_block_basic::ERROR1()
 
 	m_reg_class = m_lexems["l_error"];
 	create_lexem();
-	if (m_curr_sym.m_sym_id == 6) // eof
+	if (m_curr_sym.m_sym_id == 9) // eof
 	{
 		return EXIT1();
 	}
 
-	if (m_curr_sym.m_sym_id == 5)
+	if (m_curr_sym.m_sym_id == 10)
 	{
 		return m_states["A1"];
 	}
 
 	return m_curr_state;
-	//while (m_curr_sym.m_sym_id != 6 && m_curr_sym.m_sym_id != 5)
+	//while (m_curr_sym.m_sym_id != 9 && m_curr_sym.m_sym_id != 10)
 	//{
 	//	m_curr_sym = transliterator(m_input_file.get());
 	//}
-	//if (m_curr_sym.m_sym_id == 6) // eof
+	//if (m_curr_sym.m_sym_id == 9) // eof
 	//{
 	//	return EXIT1();
 	//}
-	//if (m_curr_sym.m_sym_id == 5)
+	//if (m_curr_sym.m_sym_id == 10)
 	//{
 	//	return m_states["A1"];
 	//}
@@ -1152,7 +1155,7 @@ void lex_block_basic::print_lexem_list()
 
 void lex_block_basic::calc_constant()
 {
-	m_reg_number = m_reg_number * std::powl(10.0, m_reg_order);
+	m_reg_number = m_reg_number * std::powl(10.0, (long double)m_reg_order);
 	add_constant();
 	m_reg_number = 0;
 	m_reg_counter = 0;
@@ -1184,11 +1187,11 @@ void lex_block_basic::add_variable()
 
 void lex_block_basic::parse()
 {
-	while (m_curr_state.m_id != 19)
+	while (m_curr_state.m_id != m_states["STOP"].m_id)
 	{
 		m_curr_sym = transliterator(m_input_file.get());
 
-		m_curr_state = (this->*m_transition_table[m_curr_state][m_curr_sym.m_sym_name])();
+		m_curr_state = (this->*m_transition_table[m_curr_state][m_curr_sym])();
 	}
 }
 

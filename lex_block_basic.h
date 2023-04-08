@@ -1,5 +1,6 @@
 #pragma once
 #include "determ_analizer.h"
+#include "Lexem.h"
 #include <list>
 #include <vector>
 #include <sstream>
@@ -13,74 +14,85 @@ protected:
 		std::string var_name;
 		double var_value = 0;
 	};
-	typedef State(lex_block_basic::* lex_func_ptr)();                    //Указатель 
-	std::map<std::string, Lexem> m_lexems;                               //Коллекция лексем
-	std::map<std::string, variable> m_name_table;                          //Таблица имён
-	std::list<std::tuple<Lexem, long long int, size_t>> m_lexem_list;    //Список лексем. Элементы -- кортежи лексема-значение-номер_строки
-	std::vector<std::tuple<char, int, lex_func_ptr>> m_detect_table;        //Таблица обнаружения
+	
+	typedef State(lex_block_basic::* lex_func_ptr)();                    //РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РјРµС‚РѕРґС‹ РєР»Р°СЃСЃР°
+	
+	std::map<std::string, Lexem> m_lexems;                               //РљРѕР»Р»РµРєС†РёСЏ Р»РµРєСЃРµРј
+	std::map<std::string, variable> m_name_table;                          //РўР°Р±Р»РёС†Р° РёРјС‘РЅ
+	std::map<State, std::map<Symbolic_token, lex_func_ptr>> m_transition_table;
+	std::list<std::tuple<Lexem, long long int, size_t>> m_lexem_list;    //РЎРїРёСЃРѕРє Р»РµРєСЃРµРј. Р­Р»РµРјРµРЅС‚С‹ -- РєРѕСЂС‚РµР¶Рё Р»РµРєСЃРµРјР°-Р·РЅР°С‡РµРЅРёРµ-РЅРѕРјРµСЂ_СЃС‚СЂРѕРєРё
+	std::map<char, int> m_begin_vector;
 
+	std::vector<std::tuple<char, int, lex_func_ptr>> m_detect_table;        //РўР°Р±Р»РёС†Р° РѕР±РЅР°СЂСѓР¶РµРЅРёСЏ
+	
 	const size_t m_state_number = 23;
 	const size_t m_symbols_number = 10;
 
-	Lexem m_reg_class;               //Регистр класса лексемы
-	long long int m_reg_name_table_pointer;  //Регистр указателя на таблицу имён, является значением PUSH и POP
-	size_t m_reg_relation;           //Регистр, хранящий первый  символ отношения
-	double m_reg_number;             //Регистр числа
-	long int m_reg_order;            //Регистр порядка
-	size_t m_reg_counter;            //Регистр счётчика
-	int m_reg_sign;                  //Регистр знака
-	size_t m_reg_line_num = 1;       //Регистр текущего номера строки
-	std::string m_reg_var_name;      //Регистр имени переменной
-	size_t m_reg_detection = 0;      //Регистр таблицы обнаружения
-	size_t m_reg_value;              //Регистр значения
-	Symbolic_token m_curr_sym;
-	State m_curr_state;
-	std::map<State, std::map<Symbolic_token, lex_func_ptr>> m_transition_table;
-	std::map<char, int> m_begin_vector;
+	size_t m_reg_relation;                   //Р РµРіРёСЃС‚СЂ, С…СЂР°РЅСЏС‰РёР№ РїРµСЂРІС‹Р№  СЃРёРјРІРѕР» РѕС‚РЅРѕС€РµРЅРёСЏ
+	size_t m_reg_counter;                    //Р РµРіРёСЃС‚СЂ СЃС‡С‘С‚С‡РёРєР°
+	size_t m_reg_line_num = 1;               //Р РµРіРёСЃС‚СЂ С‚РµРєСѓС‰РµРіРѕ РЅРѕРјРµСЂР° СЃС‚СЂРѕРєРё
+	size_t m_reg_detection = 0;              //Р РµРіРёСЃС‚СЂ С‚Р°Р±Р»РёС†С‹ РѕР±РЅР°СЂСѓР¶РµРЅРёСЏ
+	size_t m_reg_value;                      //Р РµРіРёСЃС‚СЂ Р·РЅР°С‡РµРЅРёСЏ
+	
+	Lexem m_reg_class;                       //Р РµРіРёСЃС‚СЂ РєР»Р°СЃСЃР° Р»РµРєСЃРµРјС‹
+	
+	long long int m_reg_name_table_pointer;  //Р РµРіРёСЃС‚СЂ СѓРєР°Р·Р°С‚РµР»СЏ РЅР° С‚Р°Р±Р»РёС†Сѓ РёРјС‘РЅ, СЏРІР»СЏРµС‚СЃСЏ Р·РЅР°С‡РµРЅРёРµРј PUSH Рё POP
+	long long int m_reg_order;               //Р РµРіРёСЃС‚СЂ РїРѕСЂСЏРґРєР°
+	
+	double m_reg_number;                     //Р РµРіРёСЃС‚СЂ С‡РёСЃР»Р°
+	
+	int m_reg_sign;                          //Р РµРіРёСЃС‚СЂ Р·РЅР°РєР°
+	
+	std::string m_reg_var_name;              //Р РµРіРёСЃС‚СЂ РёРјРµРЅРё РїРµСЂРµРјРµРЅРЅРѕР№
+	
+	Symbolic_token m_curr_sym;               //РўРµРєСѓС‰РёР№ СЃРёРјРІРѕР»
+	
+	State m_curr_state = State("A1", 0);                      //РўРµРєСѓС‰РµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ
+
 public:
-	//Конструктор, принимающий имя файла для анализа в качестве аргумента
+	//РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ, РїСЂРёРЅРёРјР°СЋС‰РёР№ РёРјСЏ С„Р°Р№Р»Р° РґР»СЏ Р°РЅР°Р»РёР·Р° РІ РєР°С‡РµСЃС‚РІРµ Р°СЂРіСѓРјРµРЅС‚Р°
 	lex_block_basic(std::string filename);
 
 	~lex_block_basic() { m_input_file.close(); }
 
 	void print_lexem_list();
 private:
-	//Функция парсинга, формирующая список лексем на основе входного файла
+	//Р¤СѓРЅРєС†РёСЏ РїР°СЂСЃРёРЅРіР°, С„РѕСЂРјРёСЂСѓСЋС‰Р°СЏ СЃРїРёСЃРѕРє Р»РµРєСЃРµРј РЅР° РѕСЃРЅРѕРІРµ РІС…РѕРґРЅРѕРіРѕ С„Р°Р№Р»Р°
 	virtual void parse() override;
 
-	//Определяет, к какому классу принадлежит входной символ. В соответствие с этим присваивает id и значение.
+	//РћРїСЂРµРґРµР»СЏРµС‚, Рє РєР°РєРѕРјСѓ РєР»Р°СЃСЃСѓ РїСЂРёРЅР°РґР»РµР¶РёС‚ РІС…РѕРґРЅРѕР№ СЃРёРјРІРѕР». Р’ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРµ СЃ СЌС‚РёРј РїСЂРёСЃРІР°РёРІР°РµС‚ id Рё Р·РЅР°С‡РµРЅРёРµ.
 	Symbolic_token transliterator(int sym) override;
 
-	//Функция заполняет коллекцию состояний.
+	//Р¤СѓРЅРєС†РёСЏ Р·Р°РїРѕР»РЅСЏРµС‚ РєРѕР»Р»РµРєС†РёСЋ СЃРѕСЃС‚РѕСЏРЅРёР№.
 	void fill_states() override;
 
-	//Функция заполняет коллекцию символьных лексем.
+	//Р¤СѓРЅРєС†РёСЏ Р·Р°РїРѕР»РЅСЏРµС‚ РєРѕР»Р»РµРєС†РёСЋ СЃРёРјРІРѕР»СЊРЅС‹С… Р»РµРєСЃРµРј.
 	void fill_sym_lexems() override;
 
-	//Заполнение таблицы переходов
+	//Р—Р°РїРѕР»РЅРµРЅРёРµ С‚Р°Р±Р»РёС†С‹ РїРµСЂРµС…РѕРґРѕРІ
 	void fill_transition_table() override;
 
-	//Заполнение коллекции лексем
+	//Р—Р°РїРѕР»РЅРµРЅРёРµ РєРѕР»Р»РµРєС†РёРё Р»РµРєСЃРµРј
 	void fill_lexems();
 	
-	//Инициализация начального вектора
+	//РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РЅР°С‡Р°Р»СЊРЅРѕРіРѕ РІРµРєС‚РѕСЂР°
 	void init_begin_vect();
 
-	//Инициализация таблицы обнаружения
+	//РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ С‚Р°Р±Р»РёС†С‹ РѕР±РЅР°СЂСѓР¶РµРЅРёСЏ
 	void init_detect_table();
 
-	//Добавление константы в таблицу имён
+	//Р”РѕР±Р°РІР»РµРЅРёРµ РєРѕРЅСЃС‚Р°РЅС‚С‹ РІ С‚Р°Р±Р»РёС†Сѓ РёРјС‘РЅ
 	void add_constant();
 
-	//Добавление переменной в таблицу имён
+	//Р”РѕР±Р°РІР»РµРЅРёРµ РїРµСЂРµРјРµРЅРЅРѕР№ РІ С‚Р°Р±Р»РёС†Сѓ РёРјС‘РЅ
 	void add_variable();
 
-	//Создание лексемы
+	//РЎРѕР·РґР°РЅРёРµ Р»РµРєСЃРµРјС‹
 	void create_lexem();
 
-	std::string relation_table(long long int sym);
-
 	void calc_constant();
+
+	std::string relation_table(long long int sym);
 
 	///////////////////////////////////////Procedures////////////////////////////////////////////////
 	void DA1E();
