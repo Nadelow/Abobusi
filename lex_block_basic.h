@@ -6,37 +6,41 @@
 #include <sstream>
 
 
-class lex_block_basic : public Determ_analizer
+class Lex_block : public Determ_analizer
 {
 protected:
-	struct variable 
+	/*
+	/ Структура для представления операндов
+	/ @param op_name - имя операнда
+	/ @param op_value - значение операнда
+	*/
+	struct operand 
 	{
-		std::string var_name;
-		double var_value = 0;
+		std::string op_name;
+		double op_value = 0;
 	};
 	
-	typedef State(lex_block_basic::* lex_func_ptr)();                    //Указатель на методы класса
+	typedef State(Lex_block::* lex_func_ptr)();                                   // Указатель на методы класса
 	
-	std::map<std::string, Lexem> m_lexems;                               //Коллекция лексем
-	std::map<std::string, variable> m_name_table;                          //Таблица имён
-	std::map<State, std::map<Symbolic_token, lex_func_ptr>> m_transition_table;
-	std::list<std::tuple<Lexem, long long int, size_t>> m_lexem_list;    //Список лексем. Элементы -- кортежи лексема-значение-номер_строки
-	std::map<char, int> m_begin_vector;
+	std::map<size_t, long long int> m_lines;                                      // Коллекция указателей на лексемы строк
+	std::map<std::string, Lexem> m_lexems;                                        // Коллекция лексем
+	std::map<std::string, operand> m_name_table;                                  // Таблица имён
+	std::map<State, std::map<Symbolic_token, lex_func_ptr>> m_transition_table;   // Таблица переходов автомата. При помощи обращения m_transition_table[State][Symbolic_token] будут вызываться процедуры автомата
+	std::map<char, int> m_begin_vector;                                           // Начальный вектор для обнаружения ключевых слов
+	
+	std::list<std::tuple<Lexem, long long int, size_t>> m_lexem_list;             // Список лексем. Элементы -- кортежи лексема-значение-номер_строки
 
-	std::vector<std::tuple<char, int, lex_func_ptr>> m_detect_table;        //Таблица обнаружения
-	
-	const size_t m_state_number = 23;
-	const size_t m_symbols_number = 10;
+	std::vector<std::tuple<char, int, lex_func_ptr>> m_detect_table;              //Таблица обнаружения
 
 	size_t m_reg_relation;                   //Регистр, хранящий первый  символ отношения
 	size_t m_reg_counter;                    //Регистр счётчика
 	size_t m_reg_line_num = 1;               //Регистр текущего номера строки
-	size_t m_reg_detection = 0;              //Регистр таблицы обнаружения
+	size_t m_reg_detection = 0;              //Регистр индекса таблицы обнаружения
 	size_t m_reg_value;                      //Регистр значения
 	
 	Lexem m_reg_class;                       //Регистр класса лексемы
 	
-	long long int m_reg_name_table_pointer;  //Регистр указателя на таблицу имён, является значением PUSH и POP
+	long long int m_reg_pointer;             //Регистр указателя, приведённого к типу long long
 	long long int m_reg_order;               //Регистр порядка
 	
 	double m_reg_number;                     //Регистр числа
@@ -47,13 +51,13 @@ protected:
 	
 	Symbolic_token m_curr_sym;               //Текущий символ
 	
-	State m_curr_state = State("A1", 0);                      //Текущее состояние
+	State m_curr_state = State("A1", 0);     //Текущее состояние
 
 public:
 	//Конструктор, принимающий имя файла для анализа в качестве аргумента
-	lex_block_basic(std::string filename);
+	Lex_block(std::string filename);
 
-	~lex_block_basic() { m_input_file.close(); }
+	~Lex_block() { m_input_file.close(); }
 
 	void print_lexem_list();
 private:
@@ -90,17 +94,19 @@ private:
 	//Создание лексемы
 	void create_lexem();
 
+	//Подсчёт значения константы, используя регистры знака, порядка, числа и счётчика
 	void calc_constant();
 
+	//По номеру отношения выдаёт строку, представляющую его. Нужна для печати лексем
 	std::string relation_table(long long int sym);
 
 	///////////////////////////////////////Procedures////////////////////////////////////////////////
+	State ERROR1();
+
 	void DA1E();
 	void DA1D();
 	void DA2D();
 	void DA3D();
-
-	State ERROR1();
 
 	State A1();
 	State A1a();

@@ -17,4 +17,6 @@ public:
 
 	//Оператор <. Сравниваются только id
 	int friend operator<(const Lexem& obj1, const Lexem& obj2);
+
+	bool friend operator==(const Lexem& obj1, const Lexem& obj2);
 };

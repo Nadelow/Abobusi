@@ -10,8 +10,8 @@
 class Determ_analizer
 {
 protected:
-	//State m_cur_state = State("A1", 0);                                         //Текущее состояние
-	//Symbolic_token m_cur_sym;                                                   //Текущий символ
+	State m_cur_state;                                                          //Текущее состояние
+	Symbolic_token m_cur_sym;                                                   //Текущий символ
 	std::fstream m_input_file;                                                  //Файл
 	std::map<std::string, Symbolic_token> m_sym_lexems;                         //Коллекция символьных лексем
 	std::map<std::string, State> m_states;                                      //Коллекция состояний
