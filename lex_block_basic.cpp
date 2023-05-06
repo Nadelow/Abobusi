@@ -1,8 +1,8 @@
 #include "lex_block_basic.h"
 
 /*
-/ Р’ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂРµ РїСЂРѕРёСЃС…РѕРґРёС‚ Р·Р°РїРѕР»РЅРµРЅРёРµ РІСЃРµС… С‚Р°Р±Р»РёС†, РЅРµРѕР±С…РѕРґРёРјС‹С… РґР»СЏ СЂР°Р±РѕС‚С‹ Р°РІС‚РѕРјР°С‚Р°.
-/ РўР°РєР¶Рµ СЃСЂР°Р·Сѓ Р¶Рµ РїСЂРё СЃРѕР·РґР°РЅРёРё Р»РµРєСЃ Р±Р»РѕРєР° РїСЂРѕРёСЃС…РѕРґРёС‚ РїР°СЂСЃРёРЅРі РІС…РѕРґРЅРѕРіРѕ С„Р°Р№Р»Р°
+/ В конструкторе происходит заполнение всех таблиц, необходимых для работы автомата.
+/ Также сразу же при создании лекс блока происходит парсинг входного файла
 */
 Lex_block::Lex_block(std::string filename)
 {
@@ -19,7 +19,7 @@ Lex_block::Lex_block(std::string filename)
 	init_begin_vect();
 	init_detect_table();
 	fill_transition_table();
-	
+
 	parse();
 }
 
@@ -31,7 +31,7 @@ Symbolic_token Lex_block::transliterator(int sym)
 	{
 		s_token = Symbolic_token("sym_digit", sym - '0', 1);
 	}
-	else if (sym >= 'A' && sym <= 'Z') 
+	else if (sym >= 'A' && sym <= 'Z')
 	{
 		s_token = Symbolic_token("sym_letter", sym, 0);
 	}
@@ -150,7 +150,7 @@ void Lex_block::init_begin_vect()
 }
 
 void Lex_block::init_detect_table()
-{ 
+{
 	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('+', 0, &Lex_block::B1d));
 	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('N', 0, &Lex_block::B1d));
 	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('D', 0, &Lex_block::A2q));
@@ -182,12 +182,12 @@ void Lex_block::init_detect_table()
 
 void Lex_block::fill_transition_table()
 {
-	//Р—Р°РїРѕР»РЅРёРј СЃРЅР°С‡Р°Р»Р° РІСЃСЋ С‚Р°Р±Р»РёС†Сѓ РѕС€РёР±РєР°РјРё, РёР±Рѕ РІСЂСѓС‡РЅСѓСЋ Р·Р°РїРѕР»РЅСЏС‚СЊ РµС‘ РґРѕРІРѕР»СЊРЅРѕ-С‚Р°РєРё Р»РµРЅРёРІРѕ
+	//Заполним сначала всю таблицу ошибками, ибо вручную заполнять её довольно-таки лениво
 	for (auto it = m_states.begin(); it != m_states.end(); it++)
 		for (auto it_sym = m_sym_lexems.begin(); it_sym != m_sym_lexems.end(); it_sym++)
 			(m_transition_table[it->second])[it_sym->second] = &Lex_block::ERROR1;
 
-	//Рђ С‚РµРїРµСЂСЊ СѓР¶Рµ Р·Р°РїРѕР»РЅРёРј РІСЃРµ РЅРµРѕР±С…РѕРґРёРјС‹Рµ РјРµСЃС‚Р° РїСЂРѕС†РµРґСѓСЂР°РјРё Р°РІС‚РѕРјР°С‚Р°
+	//А теперь уже заполним все необходимые места процедурами автомата
 	(m_transition_table[m_states["A1"]])[m_sym_lexems["sym_digit"]] = &Lex_block::E2a;
 	(m_transition_table[m_states["A1"]])[m_sym_lexems["sym_space"]] = &Lex_block::A1;
 	(m_transition_table[m_states["A1"]])[m_sym_lexems["sym_lf"]] = &Lex_block::A1;
@@ -612,7 +612,7 @@ State Lex_block::A2p()
 			return ERROR1();
 		}
 	}
-	else// РІС‚РѕСЂС‹Рј СЃРёРјРІРѕР»РѕРј РѕС‚РЅРѕС€РµРЅРёСЏ РјРѕР¶РµС‚ Р±С‹С‚СЊ С‚РѕР»СЊРєРѕ =, РёРЅР°С‡Рµ РѕС€РёР±РєР°
+	else// вторым символом отношения может быть только =, иначе ошибка
 	{
 		return ERROR1();
 	}
@@ -1010,7 +1010,7 @@ State Lex_block::M3()
 {
 	if (m_curr_sym.m_sym_value != 'E')
 	{
-		DA2D();                         
+		DA2D();
 		return B1b();
 	}
 	else
@@ -1195,7 +1195,7 @@ void Lex_block::create_lexem()
 		}
 		std::tuple<Lexem, long long int, int> tup(m_reg_class, m_reg_line_num, m_reg_line_num);
 		m_lexem_list.push_back(tup);
-		
+
 		auto it = &(*(--m_lexem_list.end()));
 		m_lines[m_reg_line_num] = reinterpret_cast<long long>(it);
 	}
@@ -1235,4 +1235,13 @@ void Lex_block::create_lexem()
 		m_lexem_list.push_back(tup);
 	}
 
+}
+
+std::map<std::string, Lexem> Lex_block::get_lexems()
+{
+	return m_lexems;
+}
+std::list<std::tuple<Lexem, long long int, size_t>> Lex_block::get_lexem_list()
+{
+	return m_lexem_list;
 }
