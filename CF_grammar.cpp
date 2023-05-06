@@ -4,9 +4,6 @@
 #include "CF_grammar.h"
 #include <string>
 
-/*
-использовать shared ptr
-*/
 
 void CF_grammar::fill_terminals()
 {
@@ -33,13 +30,9 @@ void CF_grammar::fill_terminals()
 
 CF_grammar::CF_grammar(const std::string filename)
 {
-    //std::map<std::string, size_t> index_sym;
     Grammar_rule curr_rule;    //Текущее правило
     std::shared_ptr<Symbol> sym;          //Символы, из которых состоит правая часть правила
     std::string word;          //Текущее считанное слово
-
-    std::map<int, int> a;
-    
 
     fill_terminals();          //Заполняем коллекцию терминальных символов
 
