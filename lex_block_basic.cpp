@@ -19,7 +19,7 @@ Lex_block::Lex_block(std::string filename)
 	init_begin_vect();
 	init_detect_table();
 	fill_transition_table();
-	
+
 	parse();
 }
 
@@ -31,7 +31,7 @@ Symbolic_token Lex_block::transliterator(int sym)
 	{
 		s_token = Symbolic_token("sym_digit", sym - '0', 1);
 	}
-	else if (sym >= 'A' && sym <= 'Z') 
+	else if (sym >= 'A' && sym <= 'Z')
 	{
 		s_token = Symbolic_token("sym_letter", sym, 0);
 	}
@@ -150,7 +150,7 @@ void Lex_block::init_begin_vect()
 }
 
 void Lex_block::init_detect_table()
-{ 
+{
 	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('+', 0, &Lex_block::B1d));
 	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('N', 0, &Lex_block::B1d));
 	m_detect_table.push_back(std::make_tuple<char, int, lex_func_ptr>('D', 0, &Lex_block::A2q));
@@ -1010,7 +1010,7 @@ State Lex_block::M3()
 {
 	if (m_curr_sym.m_sym_value != 'E')
 	{
-		DA2D();                         
+		DA2D();
 		return B1b();
 	}
 	else
@@ -1195,7 +1195,7 @@ void Lex_block::create_lexem()
 		}
 		std::tuple<Lexem, long long int, int> tup(m_reg_class, m_reg_line_num, m_reg_line_num);
 		m_lexem_list.push_back(tup);
-		
+
 		auto it = &(*(--m_lexem_list.end()));
 		m_lines[m_reg_line_num] = reinterpret_cast<long long>(it);
 	}
@@ -1235,4 +1235,13 @@ void Lex_block::create_lexem()
 		m_lexem_list.push_back(tup);
 	}
 
+}
+
+std::map<std::string, Lexem> Lex_block::get_lexems()
+{
+	return m_lexems;
+}
+std::list<std::tuple<Lexem, long long int, size_t>> Lex_block::get_lexem_list()
+{
+	return m_lexem_list;
 }

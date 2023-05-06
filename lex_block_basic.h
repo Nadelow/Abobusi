@@ -2,6 +2,8 @@
 #include "determ_analizer.h"
 #include "Lexem.h"
 #include <list>
+#include <map>
+#include <tuple>
 #include <vector>
 #include <sstream>
 
@@ -14,20 +16,20 @@ protected:
 	/ @param op_name - имя операнда
 	/ @param op_value - значение операнда
 	*/
-	struct operand 
+	struct operand
 	{
 		std::string op_name;
 		double op_value = 0;
 	};
-	
+
 	typedef State(Lex_block::* lex_func_ptr)();                                   // Указатель на методы класса
-	
+
 	std::map<size_t, long long int> m_lines;                                      // Коллекция указателей на лексемы строк
 	std::map<std::string, Lexem> m_lexems;                                        // Коллекция лексем
 	std::map<std::string, operand> m_name_table;                                  // Таблица имён
 	std::map<State, std::map<Symbolic_token, lex_func_ptr>> m_transition_table;   // Таблица переходов автомата. При помощи обращения m_transition_table[State][Symbolic_token] будут вызываться процедуры автомата
 	std::map<char, int> m_begin_vector;                                           // Начальный вектор для обнаружения ключевых слов
-	
+
 	std::list<std::tuple<Lexem, long long int, size_t>> m_lexem_list;             // Список лексем. Элементы -- кортежи лексема-значение-номер_строки
 
 	std::vector<std::tuple<char, int, lex_func_ptr>> m_detect_table;              //Таблица обнаружения
@@ -37,30 +39,37 @@ protected:
 	size_t m_reg_line_num = 1;               //Регистр текущего номера строки
 	size_t m_reg_detection = 0;              //Регистр индекса таблицы обнаружения
 	size_t m_reg_value;                      //Регистр значения
-	
+
 	Lexem m_reg_class;                       //Регистр класса лексемы
-	
+
 	long long int m_reg_pointer;             //Регистр указателя, приведённого к типу long long
 	long long int m_reg_order;               //Регистр порядка
-	
+
 	double m_reg_number;                     //Регистр числа
-	
+
 	int m_reg_sign;                          //Регистр знака
-	
+
 	std::string m_reg_var_name;              //Регистр имени переменной
-	
+
 	Symbolic_token m_curr_sym;               //Текущий символ
-	
+
 	State m_curr_state = State("A1", 0);     //Текущее состояние
 
 public:
+	//Возвращает мапу лексем
+	std::map<std::string, Lexem> get_lexems();
+
+	//Возвращает список лексем
+	std::list<std::tuple<Lexem, long long int, size_t>> get_lexem_list();
+
 	//Конструктор, принимающий имя файла для анализа в качестве аргумента
 	Lex_block(std::string filename);
 
 	~Lex_block() { m_input_file.close(); }
 
 	void print_lexem_list();
-private:
+private:	
+
 	//Функция парсинга, формирующая список лексем на основе входного файла
 	virtual void parse() override;
 
@@ -78,7 +87,7 @@ private:
 
 	//Заполнение коллекции лексем
 	void fill_lexems();
-	
+
 	//Инициализация начального вектора
 	void init_begin_vect();
 
@@ -145,14 +154,14 @@ private:
 	State A3e();
 	State A3f();
 	State A3g();
-	
+
 	State B1();
-	State B1a(); 
+	State B1a();
 	State B1b();
 	State B1c();
 	State B1d();
 	State B1e();
-	
+
 	State C1();
 	State C1a();
 
@@ -160,12 +169,12 @@ private:
 	State C2a();
 	State C2b();
 	State C2d();
-	
+
 	State D1();
 	State D1a();
 	State D1b();
 	State D1c();
-	
+
 	State D2();
 	State D2a();
 	State D2b();
@@ -176,7 +185,7 @@ private:
 
 	State D4();
 	State D4a();
-	
+
 	State D5();
 	State D5a();
 	State D5b();
@@ -198,7 +207,7 @@ private:
 	State F1();
 	State F1a();
 	State F1b();
-	
+
 	State F2();
 	State F2a();
 
@@ -215,7 +224,7 @@ private:
 	State H1d();
 	State H1e();
 	State H1f();
-	
+
 	State M1();
 	State M2();
 	State M3();
@@ -228,4 +237,3 @@ private:
 	State EXIT6();
 
 };
-
