@@ -48,22 +48,7 @@ protected:
 
     std::multimap<Symbol, Grammar_rule> m_rules;                      //Множество правил
 public:
-    CF_grammar(const std::string filename);
-    void print_rules();
-    size_t get_id(std::string S);
-
-    size_t COUNT(Symbol);
-
-    std::set<std::shared_ptr<Symbol>> FIRST1(const std::shared_ptr<Symbol>& S);
-    std::set<std::shared_ptr<Symbol>> FIRST1_REC(const std::shared_ptr<Symbol>& S, std::set<Symbol>& seen);
-
-    //Функция НАЧ1
-    std::set<std::shared_ptr<Symbol>> START1(const std::shared_ptr<Symbol>& S);
-    std::set<std::shared_ptr<Symbol>> START1_REC(const std::shared_ptr<Symbol>& S, std::set<Symbol>& seen);
-
-    //Функция КОН1
-    std::set<std::shared_ptr<Symbol>> END1(const std::shared_ptr<Symbol>& S);
-    std::set<std::shared_ptr<Symbol>> END1_REC(const std::shared_ptr<Symbol>& S, std::set<Symbol>& seen);
+    CF_grammar(const std::string filename);    
 protected:
     void fill_terminals();
 };
