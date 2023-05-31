@@ -32,6 +32,7 @@ public:
       fill_symbol_list(lexem_list);
    }
    void sinth_analize();
+   std::shared_ptr<Symbol> process_wrap(Grammar_rule&);
 private:
    bool EQUAL(std::shared_ptr<Symbol> A, std::shared_ptr<Symbol> B);
    bool MORE(std::shared_ptr<Symbol> A, std::shared_ptr<Symbol> B);

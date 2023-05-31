@@ -232,3 +232,208 @@ void BF_grammar::sinth_analize()
 		}
 	}
 }
+
+std::shared_ptr<Symbol> BF_grammar::process_wrap(Grammar_rule& rule)
+{
+	ATOM atom;
+	switch (rule.rule_number)
+	{
+	case 1: //[S] -> [PROGRAM]
+
+		break;
+	case 2: //[PROGRAM] -> LINE_NUM [OPERATOR] [PROGRAM]
+		atom.type = (ATOM::ATOM_TYPE)rule.m_right_part[1]->m_atributes.front();
+		rule.m_right_part[1]->m_atributes.pop_front();
+		rule.m_right_part[1]->m_atributes.pop_front();
+		atom.atributs = rule.m_right_part[1]->m_atributes;
+		if (atom.type == ATOM::FOR || atom.type == ATOM::FOR_STEP)
+		{
+			ATOM next;
+			next.type = ATOM::NEXT;
+			next.atributs.push_back(atom.atributs.back());
+			atom.atributs.pop_back();
+			atom.atributs.pop_back();
+			m_atom_output.emplace(atom.atributs.back(), next);
+			atom.atributs.pop_back();
+		}
+		m_atom_output.emplace(rule.m_right_part[0]->m_atributes.front(), atom);
+		break;
+	case 3: //[PROGRAM] -> LINE_NUM [OPERATOR]
+		atom.type = (ATOM::ATOM_TYPE)rule.m_right_part[1]->m_atributes.front();
+		rule.m_right_part[1]->m_atributes.pop_front();
+		rule.m_right_part[1]->m_atributes.pop_front();
+		atom.atributs = rule.m_right_part[1]->m_atributes;
+		if (atom.type == ATOM::FOR || atom.type == ATOM::FOR_STEP)
+		{
+			ATOM next;
+			next.type = ATOM::NEXT;
+			next.atributs.push_back(atom.atributs.back());
+			atom.atributs.pop_back();
+			atom.atributs.pop_back();
+			m_atom_output.emplace(atom.atributs.back(), next);
+			atom.atributs.pop_back();
+		}
+		m_atom_output.emplace(rule.m_right_part[0]->m_atributes.front(), atom);
+		break;
+	case 4: //[LINE_NUM] -> LINE_NUM
+		rule.m_non_terminal->m_atributes = rule.m_right_part[0]->m_atributes;
+		break;
+	case 5: //[OPERATOR] -> LET [E]			
+		rule.m_non_terminal->m_atributes.push_back(ATOM::LET);
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes.push_back(rule.m_right_part[0]->m_atributes.front());
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[1]->m_atributes;
+		break;
+	case 6: //[OPERATOR] -> [GOTO]
+		rule.m_non_terminal->m_atributes.push_back(ATOM::GOTO);
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes = rule.m_right_part[0]->m_atributes;
+		break;
+	case 7: //[OPERATOR] -> IF [TEST] GOTO
+		rule.m_non_terminal->m_atributes.push_back(ATOM::IF_GOTO);
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[1]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[2]->m_atributes;
+		break;
+	case 8: //[TEST] -> [E] REL [E]
+		rule.m_non_terminal->m_atributes = rule.m_right_part[0]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[1]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[2]->m_atributes;
+		break;
+	case 9: //[OPERATOR] -> [FOR1] [NEXT]
+		rule.m_non_terminal->m_atributes.push_back(ATOM::FOR_STEP);
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[0]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[1]->m_atributes;
+		break;
+	case 10: //[NEXT] -> NEXT
+		rule.m_non_terminal->m_atributes = rule.m_right_part[0]->m_atributes;
+		break;
+	case 11: //[FOR1] -> [FOR3] [PROGRAM]
+		rule.m_non_terminal->m_atributes = rule.m_right_part[0]->m_atributes;
+		break;
+	case 12: //[FOR3] -> FOR [E] TO [E] STEP [E]
+		rule.m_non_terminal->m_atributes = rule.m_right_part[0]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[1]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[3]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[5]->m_atributes;
+		break;
+	case 13: //[OPERATOR] -> [FOR2] [NEXT]
+		rule.m_non_terminal->m_atributes.push_back(ATOM::FOR);
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[0]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[1]->m_atributes;
+		break;
+	case 14: //[FOR2] -> [FOR4] [PROGRAM]
+		rule.m_non_terminal->m_atributes = rule.m_right_part[0]->m_atributes;
+		break;
+	case 15://[FOR4] -> FOR [E] TO [E]			
+		rule.m_non_terminal->m_atributes = rule.m_right_part[0]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[1]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[3]->m_atributes;
+		break;
+	case 16: //[OPERAND] -> OPERAND
+		rule.m_non_terminal->m_atributes = rule.m_right_part[0]->m_atributes;
+		break;
+	case 17: //[OPERATOR] -> REM
+		rule.m_non_terminal->m_atributes.push_back(ATOM::REM);
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		break;
+	case 18: //[OPERATOR] -> GOSUB
+		rule.m_non_terminal->m_atributes.push_back(ATOM::GOSUB);
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes.push_back(rule.m_right_part[0]->m_atributes.front());
+		break;
+	case 19: //[OPERATOR] -> RETURN
+		rule.m_non_terminal->m_atributes.push_back(ATOM::RETURN);
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes.push_back(rule.m_right_part[0]->m_atributes.front());
+		break;
+	case 20: //[OPERATOR] -> END
+		rule.m_non_terminal->m_atributes.push_back(ATOM::END);
+		rule.m_non_terminal->m_atributes.push_back(-1);
+		rule.m_non_terminal->m_atributes.push_back(rule.m_right_part[0]->m_atributes.front());
+		break;
+	case 21: //[E] ->[T]
+		rule.m_non_terminal->m_atributes = rule.m_right_part[0]->m_atributes;
+		break;
+	case 22: //[E] ->[T][E']
+		rule.m_non_terminal->m_atributes = rule.m_right_part[0]->m_atributes;
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[1]->m_atributes;
+		break;
+	case 23: //[E'] -> + [T] [E']
+		rule.m_non_terminal->m_atributes = rule.m_right_part[1]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(rule.m_right_part[0]->m_atributes.front());
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[2]->m_atributes;
+		break;
+	case 24: //[E'] -> - [T] [E']
+		rule.m_non_terminal->m_atributes = rule.m_right_part[1]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(rule.m_right_part[0]->m_atributes.front());
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[2]->m_atributes;
+		break;
+	case 25: //[E'] -> + [T]
+		rule.m_non_terminal->m_atributes = rule.m_right_part[1]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(rule.m_right_part[0]->m_atributes.front());
+		break;
+	case 26: //[E'] -> - [T]
+		rule.m_non_terminal->m_atributes = rule.m_right_part[1]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(rule.m_right_part[0]->m_atributes.front());
+		break;
+	case 27: //[T] -> [F]
+		rule.m_non_terminal->m_atributes = rule.m_right_part[0]->m_atributes;
+		break;
+	case 28: //[T] -> [F] [T']
+		rule.m_non_terminal->m_atributes = rule.m_right_part[0]->m_atributes;
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[1]->m_atributes;
+		break;
+	case 29: //[T'] -> * [F] [T']
+		rule.m_non_terminal->m_atributes = rule.m_right_part[1]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(rule.m_right_part[0]->m_atributes.front());
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[2]->m_atributes;
+		break;
+	case 30: //[T'] -> / [F] [T']
+		rule.m_non_terminal->m_atributes = rule.m_right_part[1]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(rule.m_right_part[0]->m_atributes.front());
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[2]->m_atributes;
+		break;
+	case 31: //[T'] -> ^ [F] [T']
+		rule.m_non_terminal->m_atributes = rule.m_right_part[1]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(rule.m_right_part[0]->m_atributes.front());
+		rule.m_non_terminal->m_atributes = rule.m_non_terminal->m_atributes + rule.m_right_part[2]->m_atributes;
+		break;
+	case 32: //[T'] -> * [F]
+		rule.m_non_terminal->m_atributes = rule.m_right_part[1]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(rule.m_right_part[0]->m_atributes.front());
+		break;
+	case 33: //[T'] -> / [F]
+		rule.m_non_terminal->m_atributes = rule.m_right_part[1]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(rule.m_right_part[0]->m_atributes.front());
+		break;
+	case 34: //[T'] -> ^ [F]
+		rule.m_non_terminal->m_atributes = rule.m_right_part[1]->m_atributes;
+		rule.m_non_terminal->m_atributes.push_back(rule.m_right_part[0]->m_atributes.front());
+		break;
+	case 35: //[F] -> ( [E] )
+		rule.m_non_terminal->m_atributes = rule.m_right_part[1]->m_atributes;
+		break;
+
+	case 36: //[F] -> [OPERAND]
+		rule.m_non_terminal->m_atributes = rule.m_right_part[0]->m_atributes;
+		break;
+	default:
+		break;
+	}
+
+	return rule.m_non_terminal;
+}
