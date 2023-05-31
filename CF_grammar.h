@@ -91,4 +91,8 @@ public:
     std::set<std::shared_ptr<Symbol>> CF_grammar::END1_REC(const std::shared_ptr<Symbol>& S, std::set<Symbol>& seen);
     std::set<std::shared_ptr<Symbol>> CF_grammar::FIRST1_REC(const std::shared_ptr<Symbol>& S, std::set<Symbol>& seen);
     std::set<std::shared_ptr<Symbol>> CF_grammar::FIRST1(const std::shared_ptr<Symbol>& S);
+
+    std::set<std::shared_ptr<Symbol>> START1(const std::shared_ptr<Symbol>& S);
+    std::set<std::shared_ptr<Symbol>> START1_REC(const std::shared_ptr<Symbol>& S, std::set<Symbol>& seen);
+
 }
