@@ -33,4 +33,5 @@ public:
 private:
     bool EQUAL(std::shared_ptr<Symbol> A, std::shared_ptr<Symbol> B);
     bool MORE(std::shared_ptr<Symbol> A, std::shared_ptr<Symbol> B);
+    bool LESS(std::shared_ptr<Symbol> A, std::shared_ptr<Symbol> B);
 }
