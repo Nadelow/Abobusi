@@ -179,3 +179,56 @@ void BF_grammar::fill_symbol_list(std::list<std::tuple<Lexem, long long int, siz
 	}
 	m_in_word.push_back(Dollar);
 }
+
+void BF_grammar::sinth_analize()
+{
+	std::stack<std::shared_ptr<Symbol>> stack;
+	Grammar_rule ready_to_wrap;
+	stack.push(Dollar);
+	auto curr_symb = m_in_word.begin();
+	while (curr_symb != m_in_word.end())
+	{
+		switch (m_BF_table[*stack.top()][**curr_symb])
+		{
+		case Less:
+			stack.push(*curr_symb);
+			std::cout << "COPY " << (*curr_symb)->m_name << std::endl;
+			++curr_symb;
+			break;
+		case Equal:
+			stack.push(*curr_symb);
+			std::cout << "COPY " << (*curr_symb)->m_name << std::endl;
+			++curr_symb;
+			break;
+		case More:
+			if (stack.top()->m_id == get_id("[S]") && *(*curr_symb) == *Dollar)
+			{
+				std::cout << "GOOD";
+				return;
+			}
+			while (true)
+			{
+				auto top = stack.top();
+				ready_to_wrap.m_right_part.insert(ready_to_wrap.m_right_part.begin(), top);
+				stack.pop();
+				if (m_BF_table[*stack.top()][*top] == Less)
+				{
+					auto find = m_sorted_by_right_part.find(ready_to_wrap);
+					std::cout << find->rule_number << ")" << find->m_non_terminal->m_name << " -> ";
+					for (auto& vect : ready_to_wrap.m_right_part)
+						std::cout << vect->m_name << " ";
+					std::cout << std::endl;
+					ready_to_wrap.m_non_terminal = std::make_shared<Symbol>(find->m_non_terminal->m_name, find->m_non_terminal->m_id);
+					ready_to_wrap.rule_number = find->rule_number;
+					stack.push(process_wrap(ready_to_wrap));
+					ready_to_wrap.m_right_part.clear();
+					break;
+				}
+			}
+			break;
+		case None:
+			std::cout << "error" << std::endl;
+			return;
+		}
+	}
+}
