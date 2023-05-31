@@ -73,3 +73,18 @@ public:
     }
 
 };
+
+class CF_grammar
+{
+protected:
+
+    /*
+    нужны мапы с терминалами и нетерминалами для заполнения итоговой таблицы анализатора
+    */
+    std::map<std::string, std::shared_ptr<Symbol>> m_terminals;
+    std::map<std::string, std::shared_ptr<Symbol>> m_non_terminals;
+
+    std::multimap<Symbol, Grammar_rule> m_rules;                      //Множество правил
+public:
+    CF_grammar(const std::string filename);
+}
