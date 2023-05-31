@@ -50,3 +50,19 @@ bool BF_grammar::MORE(std::shared_ptr<Symbol> A, std::shared_ptr<Symbol> B)
 
     return res;
 }
+
+bool BF_grammar::LESS(std::shared_ptr<Symbol> A, std::shared_ptr<Symbol> B)
+{
+   bool res = false;
+   for (auto& it : m_rules)
+      for (auto first = it.second.m_right_part.begin(), second = (++it.second.m_right_part.begin()); second != it.second.m_right_part.end() && first != it.second.m_right_part.end(); ++first, ++second)
+         if (*A == *(*first) && (dynamic_cast<Non_terminal*>(second->get())))
+         {
+            auto sec_start1 = START1(*second);
+            for (auto& that : sec_start1)
+               if (that->m_id == B->m_id)
+                  res = true;
+         }
+
+   return res;
+}
