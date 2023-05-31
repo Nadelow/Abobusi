@@ -46,3 +46,27 @@ public:
 		return obj1.m_id == obj2.m_id;
 	}
 };
+
+class Non_terminal : public Symbol
+{
+public:
+	virtual ~Non_terminal() {};
+	Non_terminal(std::string name_ = "", size_t id_ = 0) : Symbol(name_, id_) {}
+	
+	Non_terminal(const Symbol& S);
+	Non_terminal(const Terminal& S);
+	Non_terminal(const Non_terminal& S);
+
+	Non_terminal& operator=(const Symbol S);
+	Non_terminal& operator=(const Terminal S);
+	Non_terminal& operator=(const Non_terminal S);
+	
+	friend bool operator<(const Non_terminal& obj1, const Non_terminal& obj2)
+	{
+		return obj1.m_id < obj2.m_id;
+	}
+	friend bool operator==(const Non_terminal& obj1, const Non_terminal& obj2)
+	{
+		return obj1.m_id == obj2.m_id;
+	}
+};
