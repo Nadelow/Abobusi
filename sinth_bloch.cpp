@@ -437,3 +437,83 @@ std::shared_ptr<Symbol> BF_grammar::process_wrap(Grammar_rule& rule)
 
 	return rule.m_non_terminal;
 }
+
+void BF_grammar::print_BF_table()
+{
+    std::pair<Symbol, Symbol> pair;
+    std::set<std::pair<Symbol, Symbol>> equal;
+    std::set<std::pair<Symbol, Symbol>> less;
+    std::set<std::pair<Symbol, Symbol>> more;
+
+    for (auto& it : m_BF_table)
+    {
+
+        for (auto& that : it.second)
+        {
+            pair.first = it.first;
+            pair.second = that.first;
+            switch (that.second)
+            {
+            case Equal:
+                equal.insert(pair);
+                break;
+            case Less:
+                less.insert(pair);
+                break;
+            case More:
+                more.insert(pair);
+                break;
+            case None:
+                break;
+            }
+        }
+    }
+
+    std::cout << "LESS" << std::endl;
+    for (auto& it : less)
+    {
+        std::cout << it.first.m_name << " < " << it.second.m_name << std::endl;
+    }
+    std::cout << "MORE" << std::endl;
+    for (auto& it : more)
+    {
+        std::cout << it.first.m_name << " > " << it.second.m_name << std::endl;
+    }
+    std::cout << "EQUAL" << std::endl;
+    for (auto& it : equal)
+    {
+        std::cout << it.first.m_name << " = " << it.second.m_name << std::endl;
+    }
+}
+
+void BF_grammar::print_sorted_rules()
+{
+    for (auto& it : m_sorted_by_right_part)
+    {
+        std::cout << it.rule_number << ") " << it.m_non_terminal->m_name << " ";
+        for (auto& that : it.m_right_part)
+            std::cout << that->m_name << " ";
+        std::cout << std::endl;
+    }
+}
+
+void BF_grammar::print_FIRST_START_END()
+{
+    for (auto& it : m_non_terminals)
+    {
+        std::cout << "\n\n\nFIRST1 " << it.second->m_name << "\n";
+        auto FIRST = this->FIRST1(it.second);
+        for (auto& that : FIRST)
+            std::cout << that->m_name << std::endl;
+
+        std::cout << "\nSTART1 " << it.second->m_name << "\n";
+        auto START = this->START1(it.second);
+        for (auto& that : START)
+            std::cout << that->m_name << std::endl;
+
+        std::cout << "\nEND1 " << it.second->m_name << "\n";
+        auto END = this->END1(it.second);
+        for (auto& that : END)
+            std::cout << that->m_name << std::endl;
+    }
+}

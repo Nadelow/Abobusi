@@ -37,7 +37,13 @@ private:
    bool EQUAL(std::shared_ptr<Symbol> A, std::shared_ptr<Symbol> B);
    bool MORE(std::shared_ptr<Symbol> A, std::shared_ptr<Symbol> B);
    bool LESS(std::shared_ptr<Symbol> A, std::shared_ptr<Symbol> B);
+
+   void sort_by_right_part();
+   void fill_symbol_list(std::list<std::tuple<Lexem, long long int, size_t>>);
+
+   void print_BF_table();
+   void print_sorted_rules();
+   void print_FIRST_START_END();
 };
 
-void sort_by_right_part();
-void fill_symbol_list(std::list<std::tuple<Lexem, long long int, size_t>>);
+
