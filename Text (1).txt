@@ -1,0 +1,36 @@
+[S] -> [PROGRAM]
+[PROGRAM] -> LINE_NUM [OPERATOR] [PROGRAM]
+[PROGRAM] -> LINE_NUM [OPERATOR]
+[LINE_NUM] -> LINE_NUM
+[OPERATOR] -> LET [E]
+[OPERATOR] -> GOTO
+[OPERATOR] -> IF [TEST] GOTO
+[TEST] -> [E] REL [E]
+[OPERATOR] -> [FOR1] [NEXT]
+[NEXT] -> NEXT
+[FOR1] -> [FOR3] [PROGRAM]
+[FOR3] -> FOR [E] TO [E] STEP [E]
+[OPERATOR] -> [FOR2] [NEXT]
+[FOR2] -> [FOR4] [PROGRAM]
+[FOR4] -> FOR [E] TO [E]
+[OPERAND] -> OPERAND
+[OPERATOR] -> REM
+[OPERATOR] -> GOSUB
+[OPERATOR] -> RETURN
+[OPERATOR] -> END
+[E] -> [T]
+[E] -> [T] [E']
+[E'] -> + [T] [E']
+[E'] -> - [T] [E']
+[E'] -> + [T]
+[E'] -> - [T]
+[T] -> [F]
+[T] -> [F] [T']
+[T'] -> * [F] [T']
+[T'] -> / [F] [T']
+[T'] -> ^ [F] [T']
+[T'] -> * [F]
+[T'] -> / [F]
+[T'] -> ^ [F]
+[F] -> ( [E] )
+[F] -> [OPERAND]
