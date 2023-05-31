@@ -232,8 +232,54 @@ std::set<std::shared_ptr<Symbol>> CF_grammar::START1_REC(const std::shared_ptr<S
    return first_syms;
 }
 
+void CF_grammar::print_rules()
+{
+   for(auto& it :m_rules)
+   {
+      std::cout << it.second.rule_number << ")" << it.first.m_name << " -> ";
+      for (auto that : it.second.m_right_part)
+         std::cout << that->m_name << ' ';
+      std::cout<<std::endl;
+   }
+}
 
+size_t CF_grammar::get_id(std::string S)
+{
+   if (m_non_terminals.contains(S))
+      return m_non_terminals[S]->m_id;
 
+   if (m_terminals.contains(S))
+      return m_terminals[S]->m_id;
+
+   return -1;
+}
+
+void CF_grammar::fill_terminals()
+{
+   m_terminals.emplace("LINE_NUM",    std::make_shared<Terminal>("LINE_NUM" ,0)); //line num
+   m_terminals.emplace("OPERAND",std::make_shared<Terminal>("OPERAND" ,1)); //variable/constant
+   m_terminals.emplace("^", std::make_shared<Terminal>("^" ,2));
+   m_terminals.emplace("REL",  std::make_shared<Terminal>("REL" ,3));
+   m_terminals.emplace("NEXT",   std::make_shared<Terminal>("NEXT" ,4));
+   m_terminals.emplace("LET",    std::make_shared<Terminal>("LET" ,5));
+   m_terminals.emplace("FOR",    std::make_shared<Terminal>("FOR" ,6));
+   m_terminals.emplace("GOTO",   std::make_shared<Terminal>("GOTO" ,7));
+   m_terminals.emplace("GOSUB",  std::make_shared<Terminal>("GOSUB" ,8));
+   m_terminals.emplace("(",      std::make_shared<Terminal>("(" ,9));
+   m_terminals.emplace(")",      std::make_shared<Terminal>(")" ,10));
+   m_terminals.emplace("IF",     std::make_shared<Terminal>("IF" ,11));
+   m_terminals.emplace("RETURN", std::make_shared<Terminal>("RETURN" ,12));
+   m_terminals.emplace("END",    std::make_shared<Terminal>("END" ,13));
+   m_terminals.emplace("TO",     std::make_shared<Terminal>("TO" ,14));
+   m_terminals.emplace("STEP",   std::make_shared<Terminal>("STEP" ,15));
+   m_terminals.emplace("REM",    std::make_shared<Terminal>("REM" ,16));
+   m_terminals.emplace("!error!",std::make_shared<Terminal>("!error!" ,17));
+   m_terminals.emplace("EOF",    std::make_shared<Terminal>("EOF" ,18));
+   m_terminals.emplace("+", std::make_shared<Terminal>("+", 19));
+   m_terminals.emplace("-", std::make_shared<Terminal>("-", 20));
+   m_terminals.emplace("*", std::make_shared<Terminal>("*", 21));
+   m_terminals.emplace("/", std::make_shared<Terminal>("/", 22));
+}
 
 
 
