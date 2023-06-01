@@ -47,6 +47,30 @@ public:
 	}
 };
 
+class Terminal : public Symbol
+{
+public:
+	virtual ~Terminal() {};
+	Terminal(std::string name_ = "", size_t id_ = 0) : Symbol(name_, id_) {}
+	
+	Terminal(const Symbol& S);
+	Terminal(const Terminal& S);
+	Terminal(const Non_terminal& S);
+	
+	Terminal& operator= (const Symbol S);
+	Terminal& operator= (const Terminal S);
+	Terminal& operator= (const Non_terminal S);
+	
+	friend bool operator<(const Terminal& obj1, const Terminal& obj2)
+	{
+		return obj1.m_id < obj2.m_id;
+	}
+	friend bool operator==(const Terminal& obj1, const Terminal& obj2)
+	{
+		return obj1.m_id == obj2.m_id;
+	}
+};
+
 class Non_terminal : public Symbol
 {
 public:
@@ -66,29 +90,6 @@ public:
 		return obj1.m_id < obj2.m_id;
 	}
 	friend bool operator==(const Non_terminal& obj1, const Non_terminal& obj2)
-	{
-		return obj1.m_id == obj2.m_id;
-	}
-};
-class Terminal : public Symbol
-{
-public:
-	virtual ~Terminal() {};
-	Terminal(std::string name_ = "", size_t id_ = 0) : Symbol(name_, id_) {}
-
-	Terminal(const Symbol& S);
-	Terminal(const Terminal& S);
-	Terminal(const Non_terminal& S);
-
-	Terminal& operator= (const Symbol S);
-	Terminal& operator= (const Terminal S);
-	Terminal& operator= (const Non_terminal S);
-
-	friend bool operator<(const Terminal& obj1, const Terminal& obj2)
-	{
-		return obj1.m_id < obj2.m_id;
-	}
-	friend bool operator==(const Terminal& obj1, const Terminal& obj2)
 	{
 		return obj1.m_id == obj2.m_id;
 	}

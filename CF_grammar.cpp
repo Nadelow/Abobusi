@@ -4,9 +4,7 @@
 #include "CF_grammar.h"
 #include <string>
 
-/*
-использовать shared ptr
-*/
+
 
 void CF_grammar::fill_terminals()
 {
@@ -124,11 +122,30 @@ CF_grammar::CF_grammar(const std::string filename)
 }
 
 
+void CF_grammar::print_rules()
+{
+    for(auto& it :m_rules)
+    {
+        std::cout << it.second.rule_number << ")" << it.first.m_name << " -> ";
+        for (auto that : it.second.m_right_part)
+            std::cout << that->m_name << ' ';
+        std::cout<<std::endl;
+    }
+}
+
+size_t CF_grammar::get_id(std::string S)
+{
+    if (m_non_terminals.contains(S))
+        return m_non_terminals[S]->m_id;
+
+    if (m_terminals.contains(S))
+        return m_terminals[S]->m_id;
+
+    return -1;
+}
 
 
-
-
-
+////////////////////////////////////////////////////////FIRST1//////////////////////////////////////////////////////////////
 std::set<std::shared_ptr<Symbol>> CF_grammar::FIRST1(const std::shared_ptr<Symbol>& S)
 {
     std::set<Symbol> seen;
@@ -150,10 +167,11 @@ std::set<std::shared_ptr<Symbol>> CF_grammar::FIRST1_REC(const std::shared_ptr<S
     size_t rules_amount = m_rules.count(*S);
     auto it = m_rules.find(*S);
 
-    for (size_t i = 0; it != m_rules.end() && i < rules_amount; ++i, ++it)
+    for(size_t i = 0; it != m_rules.end() && i < rules_amount; ++i, ++it)
     {
-        if (dynamic_cast<Terminal*>((*it).second.m_right_part[0].get()))        
-        else if (seen.find(*((*it).second.m_right_part[0])) == seen.end())      
+        if(dynamic_cast<Terminal*>((*it).second.m_right_part[0].get()))        //Terminal
+            first_syms.insert((*it).second.m_right_part[0]);
+        else if(seen.find(*((*it).second.m_right_part[0])) == seen.end())      //Non_terminal
         {
             seen.insert(*((*it).second.m_right_part[0]));
             first_syms.merge(FIRST1_REC((*it).second.m_right_part[0], seen));
@@ -163,12 +181,54 @@ std::set<std::shared_ptr<Symbol>> CF_grammar::FIRST1_REC(const std::shared_ptr<S
     return first_syms;
 }
 
+////////////////////////////////////////////////////////START1//////////////////////////////////////////////////////////////
+std::set<std::shared_ptr<Symbol>> CF_grammar::START1(const std::shared_ptr<Symbol>& S)
+{
+    if (dynamic_cast<Terminal*>(S.get()))
+    {
+        std::set<std::shared_ptr<Symbol>> res;
+        res.insert(S);
+        return res;
+    }
 
+    std::set<Symbol> seen;
+
+    return START1_REC(S, seen);
+}
+
+std::set<std::shared_ptr<Symbol>> CF_grammar::START1_REC(const std::shared_ptr<Symbol>& S, std::set<Symbol>& seen)
+{
+    std::set<std::shared_ptr<Symbol>> first_syms;
+
+    size_t rules_amount = m_rules.count(*S);
+    auto it = m_rules.find(*S);
+
+    for (size_t i = 0; it != m_rules.end() && i < rules_amount; ++i, ++it)
+    {
+        
+        first_syms.insert(it->second.m_right_part[0]);
+
+        if(dynamic_cast<Non_terminal*>(it->second.m_right_part[0].get()))
+            if (seen.find(*it->second.m_right_part[0]) == seen.end())
+            {
+                seen.insert(*it->second.m_right_part[0]);
+                first_syms.merge(START1_REC((*it).second.m_right_part[0], seen));
+            }
+    }
+
+    return first_syms;
+}
+
+
+
+////////////////////////////////////////////////////////END1//////////////////////////////////////////////////////////////
 std::set<std::shared_ptr<Symbol>> CF_grammar::END1(const std::shared_ptr<Symbol>& S)
 {
     if (dynamic_cast<Terminal*>(S.get()))
     {
-        return std::set<std::shared_ptr<Symbol>>();
+        std::set<std::shared_ptr<Symbol>> res;
+        res.insert(S);
+        return res;
     }
 
     std::set<Symbol> seen;
@@ -197,89 +257,16 @@ std::set<std::shared_ptr<Symbol>> CF_grammar::END1_REC(const std::shared_ptr<Sym
     return last_syms;
 }
 
-std::set<std::shared_ptr<Symbol>> CF_grammar::START1(const std::shared_ptr<Symbol>& S)
-{
-   if (dynamic_cast<Terminal*>(S.get()))
-   {
-      return std::set<std::shared_ptr<Symbol>>();
-   }
 
-   std::set<Symbol> seen;
 
-   return START1_REC(S, seen);
-}
 
-std::set<std::shared_ptr<Symbol>> CF_grammar::START1_REC(const std::shared_ptr<Symbol>& S, std::set<Symbol>& seen)
-{
-   std::set<std::shared_ptr<Symbol>> first_syms;
 
-   size_t rules_amount = m_rules.count(*S);
-   auto it = m_rules.find(*S);
 
-   for (size_t i = 0; it != m_rules.end() && i < rules_amount; ++i, ++it)
-   {
 
-      first_syms.insert(it->second.m_right_part[0]);
 
-      if (dynamic_cast<Non_terminal*>(it->second.m_right_part[0].get()))
-         if (seen.find(*it->second.m_right_part[0]) == seen.end())
-         {
-            seen.insert(*it->second.m_right_part[0]);
-            first_syms.merge(START1_REC((*it).second.m_right_part[0], seen));
-         }
-   }
 
-   return first_syms;
-}
 
-void CF_grammar::print_rules()
-{
-   for(auto& it :m_rules)
-   {
-      std::cout << it.second.rule_number << ")" << it.first.m_name << " -> ";
-      for (auto that : it.second.m_right_part)
-         std::cout << that->m_name << ' ';
-      std::cout<<std::endl;
-   }
-}
 
-size_t CF_grammar::get_id(std::string S)
-{
-   if (m_non_terminals.contains(S))
-      return m_non_terminals[S]->m_id;
-
-   if (m_terminals.contains(S))
-      return m_terminals[S]->m_id;
-
-   return -1;
-}
-
-void CF_grammar::fill_terminals()
-{
-   m_terminals.emplace("LINE_NUM",    std::make_shared<Terminal>("LINE_NUM" ,0)); //line num
-   m_terminals.emplace("OPERAND",std::make_shared<Terminal>("OPERAND" ,1)); //variable/constant
-   m_terminals.emplace("^", std::make_shared<Terminal>("^" ,2));
-   m_terminals.emplace("REL",  std::make_shared<Terminal>("REL" ,3));
-   m_terminals.emplace("NEXT",   std::make_shared<Terminal>("NEXT" ,4));
-   m_terminals.emplace("LET",    std::make_shared<Terminal>("LET" ,5));
-   m_terminals.emplace("FOR",    std::make_shared<Terminal>("FOR" ,6));
-   m_terminals.emplace("GOTO",   std::make_shared<Terminal>("GOTO" ,7));
-   m_terminals.emplace("GOSUB",  std::make_shared<Terminal>("GOSUB" ,8));
-   m_terminals.emplace("(",      std::make_shared<Terminal>("(" ,9));
-   m_terminals.emplace(")",      std::make_shared<Terminal>(")" ,10));
-   m_terminals.emplace("IF",     std::make_shared<Terminal>("IF" ,11));
-   m_terminals.emplace("RETURN", std::make_shared<Terminal>("RETURN" ,12));
-   m_terminals.emplace("END",    std::make_shared<Terminal>("END" ,13));
-   m_terminals.emplace("TO",     std::make_shared<Terminal>("TO" ,14));
-   m_terminals.emplace("STEP",   std::make_shared<Terminal>("STEP" ,15));
-   m_terminals.emplace("REM",    std::make_shared<Terminal>("REM" ,16));
-   m_terminals.emplace("!error!",std::make_shared<Terminal>("!error!" ,17));
-   m_terminals.emplace("EOF",    std::make_shared<Terminal>("EOF" ,18));
-   m_terminals.emplace("+", std::make_shared<Terminal>("+", 19));
-   m_terminals.emplace("-", std::make_shared<Terminal>("-", 20));
-   m_terminals.emplace("*", std::make_shared<Terminal>("*", 21));
-   m_terminals.emplace("/", std::make_shared<Terminal>("/", 22));
-}
 
 
 

@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #pragma once
 #include <string>
 #include <set>
@@ -77,26 +80,26 @@ public:
 class CF_grammar
 {
 protected:
-
-    /*
-    нужны мапы с терминалами и нетерминалами для заполнения итоговой таблицы анализатора
-    */
+    
+ 
     std::map<std::string, std::shared_ptr<Symbol>> m_terminals;
     std::map<std::string, std::shared_ptr<Symbol>> m_non_terminals;
 
     std::multimap<Symbol, Grammar_rule> m_rules;                      //Множество правил
 public:
     CF_grammar(const std::string filename);
-
     void print_rules();
     size_t get_id(std::string S);
-protected:
-    std::set<std::shared_ptr<Symbol>> CF_grammar::END1(const std::shared_ptr<Symbol>& S);
-    std::set<std::shared_ptr<Symbol>> CF_grammar::END1_REC(const std::shared_ptr<Symbol>& S, std::set<Symbol>& seen);
-    std::set<std::shared_ptr<Symbol>> CF_grammar::FIRST1_REC(const std::shared_ptr<Symbol>& S, std::set<Symbol>& seen);
-    std::set<std::shared_ptr<Symbol>> CF_grammar::FIRST1(const std::shared_ptr<Symbol>& S);
+    std::set<std::shared_ptr<Symbol>> FIRST1(const std::shared_ptr<Symbol>& S);
+    std::set<std::shared_ptr<Symbol>> FIRST1_REC(const std::shared_ptr<Symbol>& S, std::set<Symbol>& seen);
 
+    //Функция НАЧ1
     std::set<std::shared_ptr<Symbol>> START1(const std::shared_ptr<Symbol>& S);
     std::set<std::shared_ptr<Symbol>> START1_REC(const std::shared_ptr<Symbol>& S, std::set<Symbol>& seen);
+
+    //Функция КОН1
+    std::set<std::shared_ptr<Symbol>> END1(const std::shared_ptr<Symbol>& S);
+    std::set<std::shared_ptr<Symbol>> END1_REC(const std::shared_ptr<Symbol>& S, std::set<Symbol>& seen);
+protected:
     void fill_terminals();
-}
+};
